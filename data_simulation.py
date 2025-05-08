@@ -49,4 +49,29 @@ def simulate_notifications(notifications_id, user_id):
     time_start = f"{hours_start:02}:{minutes_start:02}:{seconds_start:02}"
     start_time = f"{date} {time_start}"
     created_at = start_time
+    is_read = random.choice([True, False])
+    return(notifications_id, user_id, message, created_at, is_read)
+
+def simulate_useraccount(user_id, progress_id, scheduled_id, preferences_id):
+    skin_type = random.choice(range(1, 7))
+    start_date = datetime(2025, 1, 1)
+    end_date = datetime(2030, 12, 31)
+    delta = end_date - start_date
+    random_days = random.randint(0, delta.days)
+    random_date = start_date + timedelta(days=random_days)
+    date = random_date.strftime('%Y-%m-%d')
+    hours_start = random.randint(0, 23)
+    minutes_start = random.randint(0, 59)
+    seconds_start = random.randint(0, 59)
+    time_start = f"{hours_start:02}:{minutes_start:02}:{seconds_start:02}"
+    start_time = f"{date} {time_start}"
+    created_at = start_time
+    return [user_id, skin_type, created_at, progress_id, scheduled_id, preferences_id]
+
+def simulate_progressdata(progress_id):
+    pass
+
+def simulate_weatherdata():
+    pass
+
                             
