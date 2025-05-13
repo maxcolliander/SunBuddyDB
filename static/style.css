@@ -1,9 +1,9 @@
 :root {
-  --bg: #f9f9f6;           /* very soft beige-white */
-  --surface: #ffffff;      /* white cards */
-  --primary: #ffd27f;      /* soft pastel yellow */
-  --accent: #e28860;       /* muted sun-warm coral */
-  --text: #2e2e2e;         /* near-black, not pure black */
+  --bg: #f9f9f6;
+  --surface: #ffffff;
+  --primary: #ffd27f;
+  --accent: #e28860;
+  --text: #2e2e2e;
   --text-light: #666;
   --border: #e6e6e6;
 }

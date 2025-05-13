@@ -1,4 +1,4 @@
-fetch('users.json')
+fetch('../users.json')
   .then(res => res.json())
   .then(users => {
     const table = document.getElementById('userTable');
