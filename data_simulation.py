@@ -1,6 +1,7 @@
 import random
 from datetime import datetime, timedelta
 import json
+import math
 
 def simulate_preferences(preferences_id):
     max_time = random.choice(range(30, 601, 15))
@@ -15,7 +16,7 @@ def simulate_preferences(preferences_id):
     return [preferences_id, min_time, max_time, weight_time, min_temp, max_temp, weight_temp, min_uv, max_uv, weight_uv]
 
 def simulate_progressdata(progress_id):
-    tan_level = random.randint(0, 5)
+    tan_level = random.randint(0, 100)
     start_date = datetime(2025, 1, 1)
     random_days = random.randint(0, (datetime(2030, 12, 31) - start_date).days)
     random_date = start_date + timedelta(days=random_days)
@@ -39,7 +40,8 @@ def simulate_session(session_id, scheduled_id, progress_id):
     time_end = f"{hours_end:02}:{minutes_end:02}:{seconds_end:02}"
     start_time = f"{date} {time_start}"
     end_time = f"{date} {time_end}"
-    return[session_id, scheduled_id, progress_id, location, start_time, end_time]
+    is_scheduled = random.choice([True, False])
+    return[session_id, scheduled_id, progress_id, location, start_time, end_time, is_scheduled]
 
 def simulate_notifications(notifications_id, user_id):
     message = random.choice(["Your tanning session starts in 30 minutes, get ready!", 
@@ -60,7 +62,7 @@ def simulate_notifications(notifications_id, user_id):
     is_read = random.choice([True, False])
     return(notifications_id, user_id, message, created_at, is_read)
 
-def simulate_useraccount(user_id, progress_id, scheduled_id, preferences_id):
+def simulate_useraccount(user_id, progress_id, session_id, preferences_id):
     skin_type = random.choice(range(1, 7))
     start_date = datetime(2025, 1, 1)
     end_date = datetime(2030, 12, 31)
@@ -74,10 +76,44 @@ def simulate_useraccount(user_id, progress_id, scheduled_id, preferences_id):
     time_start = f"{hours_start:02}:{minutes_start:02}:{seconds_start:02}"
     start_time = f"{date} {time_start}"
     created_at = start_time
-    return [user_id, skin_type, created_at, progress_id, scheduled_id, preferences_id]
+    return [user_id, skin_type, created_at, progress_id, session_id, preferences_id]
 
-def simulate_weatherdata():
-    pass
+def simulate_weatherdata(weather_key):
+    location = random.choice(["Los Angeles", "Karlskrona", "Falkenberg", "Toronto", "Stockholm", "Madrid", "Paris", "Rom", "Oslo", "Copenhagen", "Washington"])
+    start_date = datetime(2025, 1, 1)
+    random_days = random.randint(0, (datetime(2030, 12, 31) - start_date).days)
+    random_date = start_date + timedelta(days=random_days)
+    weather_condition = random.choice(["Sunny", "Partly cloudy", "Cloudy", "Rainy", "Windy"])
+
+    # Temp
+    temperatures = {}
+    base_temp = random.uniform(10, 20)  # base average temperature (°C)
+    amplitude = random.uniform(5, 10)   # variation during the day
+
+    for hour in range(24):
+        # Use a cosine wave to simulate daily temperature curve
+        temp = base_temp + amplitude * math.cos((hour - 14) * math.pi / 12)
+        # Add small random noise
+        temp += random.uniform(-1.5, 1.5)
+        temperatures[hour] = round(temp, 1)
+
+    # UV
+    uv_index = {}
+    peak_uv = random.uniform(6, 10)  # Max UV for the day (can vary with weather/season)
+
+    for hour in range(24):
+        # UV is generally 0 outside 6 AM to 7 PM
+        if 6 <= hour <= 19:
+            # Simulate a UV curve peaking around 13:00 (1 PM)
+            uv = peak_uv * math.exp(-((hour - 13) ** 2) / 8)
+            # Add small random noise
+            uv += random.uniform(-0.3, 0.3)
+            uv = max(0, uv)  # Ensure no negative UV
+        else:
+            uv = 0.0
+        uv_index[hour] = round(uv, 1)
+
+    return [weather_key, location, random_date.strftime('%Y-%m-%d'), uv_index, temperatures, weather_condition]
 
 
 if __name__ == "__main__":
@@ -127,3 +163,22 @@ if __name__ == "__main__":
         })
     with open("users.json", "w") as f:
         json.dump(all_users, f, indent=2)
+
+    json_data = []
+    for i in range(100):
+        weather_data = simulate_weatherdata(i)
+
+        data_to_write = {
+            "weather_key": weather_data[0],
+            "location": weather_data[1],
+            "date": weather_data[2],
+            "temperature_per_hour": weather_data[3],
+            "uv_index_per_hour": weather_data[4],
+            "weather_condition": weather_data[5]
+        }
+        
+        json_data.append(data_to_write)
+    
+    with open("weather_data.json", "w") as f:
+        json.dump(json_data, f, indent=2)
+    f.close()
