@@ -1,5 +1,6 @@
 import random
 from datetime import datetime, timedelta
+import json
 
 def simulate_preferences(preferences_id):
     max_time = random.choice(range(30, 601, 15))
@@ -12,6 +13,13 @@ def simulate_preferences(preferences_id):
     max_uv = random.choice(range(2, 15, 1))
     weight_uv = random.choice([1, 2, 3])
     return [preferences_id, min_time, max_time, weight_time, min_temp, max_temp, weight_temp, min_uv, max_uv, weight_uv]
+
+def simulate_progressdata(progress_id):
+    tan_level = random.randint(0, 5)
+    start_date = datetime(2025, 1, 1)
+    random_days = random.randint(0, (datetime(2030, 12, 31) - start_date).days)
+    random_date = start_date + timedelta(days=random_days)
+    return [progress_id, tan_level, random_date.strftime('%Y-%m-%d')]
 
 def simulate_session(session_id, scheduled_id, progress_id):
     location = random.choice(["Los Angeles", "Karlskrona", "Falkenberg", "Toronto", "Stockholm", "Madrid", "Paris", "Rom", "Oslo", "Copenhagen", "Washington"])
@@ -68,10 +76,54 @@ def simulate_useraccount(user_id, progress_id, scheduled_id, preferences_id):
     created_at = start_time
     return [user_id, skin_type, created_at, progress_id, scheduled_id, preferences_id]
 
-def simulate_progressdata(progress_id):
-    pass
-
 def simulate_weatherdata():
     pass
 
-                            
+
+if __name__ == "__main__":
+    all_users = []
+    for i in range(1, 101):
+        user_id = i
+        progress_id = i
+        preferences_id = i
+        session_id = i
+        notifications_id = i
+
+        user = simulate_useraccount(user_id, progress_id, session_id, preferences_id)
+        preferences = simulate_preferences(preferences_id)
+        session = simulate_session(session_id, session_id, progress_id)
+        progress = simulate_progressdata(progress_id)
+        notification = simulate_notifications(notifications_id, user_id)
+        
+        all_users.append({
+            "user_id": user[0],
+            "skin_type": user[1],
+            "created_at": user[2],
+            "session": {
+                "location": session[3],
+                "start_time": session[4],
+                "end_time": session[5]
+            },
+            "progress": {
+                "tan_level": progress[1],
+                "date": progress[2]
+            },
+            "preferences": {
+                "min_time": preferences[1],
+                "max_time": preferences[2],
+                "weight_time": preferences[3],
+                "min_temp": preferences[4],
+                "max_temp": preferences[5],
+                "weight_temp": preferences[6],
+                "min_uv": preferences[7],
+                "max_uv": preferences[8],
+                "weight_uv": preferences[9]
+            },
+            "notifications": {
+                "message": notification[2],
+                "created_at": notification[3],
+                "is_read": notification[4]
+            }
+        })
+    with open("users.json", "w") as f:
+        json.dump(all_users, f, indent=2)
