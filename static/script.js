@@ -117,8 +117,7 @@ addUserForm.addEventListener('submit', (event) => {
           // Add both rows to the table
           table.appendChild(row);
           table.appendChild(detailRow);
-
-          alert('User added successfully!');
+          
           modal.style.display = 'none';
           addUserForm.reset();
         } else {
@@ -143,7 +142,6 @@ randomizeUserButton.addEventListener('click', () => {
     .then(data => {
       console.log('Randomized User Data:', data);
      if (data.user_id && data.skin_type && data.created_at) {
-        alert(`Randomized User Data:\nUser ID: ${data.user_id}\nSkin Type: ${data.skin_type}\nCreated At: ${data.created_at}`);
         
         // Optionally, populate the form fields with the randomized data
         document.getElementById('userId').value = data.user_id;
