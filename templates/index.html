@@ -13,14 +13,17 @@
   </header>
 
   <main>
+    
     <section id="users">
-      <h2>User Accounts</h2>
+      <div class="heading-container">
+        <h2>User Accounts</h2>
+        <button id="addUserButton">Add User</button>
+      </div>
       <table>
         <thead>
           <tr>
             <th>User ID</th>
             <th>Created At</th>
-            <th>Location</th>
           </tr>
         </thead>
         <tbody id="userTable">
@@ -29,7 +32,34 @@
     </section>
 
   </main>
+  <div id="addUserModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <h2>Add User</h2>
+      <form id="addUserForm">
+        <label for="userId">User ID:</label>
+        <input type="text" id="userId" name="userId" required>
 
+      <label for="skinType">Skin Type:</label>
+      <select id="skinType" name="skinType" required>
+        <option value="" disabled selected>Select Skin Type</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="unknown">Don't know</option>
+      </select>
+        
+        <label for="createdAt">Created At:</label>
+        <input type="date" id="createdAt" name="createdAt" required>
+        
+        <button type="submit">Add User</button>
+      </form>
+      <button id="randomizeUserButton">Randomize User Data</button>
+    </div>
+  </div>
   <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

@@ -29,7 +29,7 @@ CREATE TABLE session (
 CREATE TABLE useraccount (
   user_id INT PRIMARY KEY,
   skin_type INT,
-  created_at TIMESTAMP,
+  created_at DATE,
   progress_id INT NOT NULL,
   preferences_id INT NOT NULL,
   session_id INT NOT NULL,
@@ -55,5 +55,3 @@ CREATE TABLE notifications (
   is_read BOOLEAN,
   FOREIGN KEY (user_id) REFERENCES useraccount(user_id)
 );
-
-INSERT

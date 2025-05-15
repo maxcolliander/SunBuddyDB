@@ -62,7 +62,11 @@ def simulate_notifications(notifications_id, user_id):
     is_read = random.choice([True, False])
     return(notifications_id, user_id, message, created_at, is_read)
 
-def simulate_useraccount(user_id, progress_id, session_id, preferences_id):
+def simulate_useraccount(user_id=None, progress_id=None, session_id=None, preferences_id=None):
+    user_id = user_id or random.randint(1, 100000)
+    progress_id = progress_id or random.randint(1, 1000)
+    session_id = session_id or random.randint(1, 1000)
+    preferences_id = preferences_id or random.randint(1, 1000)
     skin_type = random.choice(range(1, 7))
     start_date = datetime(2025, 1, 1)
     end_date = datetime(2030, 12, 31)
@@ -70,11 +74,7 @@ def simulate_useraccount(user_id, progress_id, session_id, preferences_id):
     random_days = random.randint(0, delta.days)
     random_date = start_date + timedelta(days=random_days)
     date = random_date.strftime('%Y-%m-%d')
-    hours_start = random.randint(0, 23)
-    minutes_start = random.randint(0, 59)
-    seconds_start = random.randint(0, 59)
-    time_start = f"{hours_start:02}:{minutes_start:02}:{seconds_start:02}"
-    start_time = f"{date} {time_start}"
+    start_time = f"{date}"
     created_at = start_time
     return [user_id, skin_type, created_at, progress_id, session_id, preferences_id]
 
