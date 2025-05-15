@@ -62,8 +62,7 @@ def simulate_notifications(notifications_id, user_id):
     is_read = random.choice([True, False])
     return(notifications_id, user_id, message, created_at, is_read)
 
-def simulate_useraccount(user_id=None, progress_id=None, session_id=None, preferences_id=None):
-    user_id = user_id or random.randint(1, 100000)
+def simulate_useraccount(progress_id=None, session_id=None, preferences_id=None):
     progress_id = progress_id or random.randint(1, 1000)
     session_id = session_id or random.randint(1, 1000)
     preferences_id = preferences_id or random.randint(1, 1000)
@@ -76,7 +75,7 @@ def simulate_useraccount(user_id=None, progress_id=None, session_id=None, prefer
     date = random_date.strftime('%Y-%m-%d')
     start_time = f"{date}"
     created_at = start_time
-    return [user_id, skin_type, created_at, progress_id, session_id, preferences_id]
+    return [skin_type, created_at, progress_id, session_id, preferences_id]
 
 def simulate_weatherdata(weather_key):
     location = random.choice(["Los Angeles", "Karlskrona", "Falkenberg", "Toronto", "Stockholm", "Madrid", "Paris", "Rom", "Oslo", "Copenhagen", "Washington"])

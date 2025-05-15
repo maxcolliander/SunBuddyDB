@@ -1,24 +1,24 @@
+CREATE TABLE progressData (
+  progress_id INT AUTO_INCREMENT PRIMARY KEY,
+  tan_level INT,
+  date DATE
+);
+
 CREATE TABLE preferences (
-  preferences_id INT PRIMARY KEY,
-  max_time TIMESTAMP,
+  preferences_id INT AUTO_INCREMENT PRIMARY KEY,
   min_time TIMESTAMP,
+  max_time TIMESTAMP,
   weight_time INT,
-  max_temp INT,
   min_temp INT,
+  max_temp INT,
   weight_temp INT,
   min_uv INT,
   max_uv INT,
   weight_uv INT
 );
 
-CREATE TABLE progressData (
-  progress_id INT PRIMARY KEY,
-  tan_level INT,
-  date DATE
-);
-
 CREATE TABLE session (
-  session_id INT PRIMARY KEY,
+  session_id INT AUTO_INCREMENT PRIMARY KEY,
   location VARCHAR(100),
   date DATE,
   start_time TIMESTAMP,
@@ -27,7 +27,7 @@ CREATE TABLE session (
 );
 
 CREATE TABLE useraccount (
-  user_id INT PRIMARY KEY,
+  user_id INT AUTO_INCREMENT PRIMARY KEY,
   skin_type INT,
   created_at DATE,
   progress_id INT NOT NULL,

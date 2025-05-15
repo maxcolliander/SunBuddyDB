@@ -33,9 +33,8 @@ def randomize_user():
         
         user = data_simulation.simulate_useraccount()
         user_data = {
-            "user_id": user[0],
-            "skin_type": user[1],
-            "created_at": user[2],
+            "skin_type": user[0],
+            "created_at": user[1],
         }
         print(f"User data: {user_data}")
         return jsonify(user_data)
@@ -45,39 +44,42 @@ def randomize_user():
 
 @app.route('/add-user', methods=['POST'])
 def add_user():
-    """Insert a new user into the useraccount table."""
     try:
         data = request.get_json()
-        user_id = data['user_id']
+    
         skin_type = data['skin_type']
         created_at = data['created_at']
 
         conn = get_connection()
         cursor = conn.cursor()
 
-        # Insert into progressData table
+        # Insert into progressData (let DB assign ID)
         cursor.execute("""
-            INSERT INTO progressData (progress_id, tan_level, date)
-            VALUES (%s, %s, %s)
-        """, (user_id, None, None))  # Default tan_level is 0
+            INSERT INTO progressData (tan_level, date)
+            VALUES (%s, %s)
+        """, (None, None))
+        progress_id = cursor.lastrowid
 
-        # Insert into preferences table
+        # Insert into preferences
         cursor.execute("""
-            INSERT INTO preferences (preferences_id, min_time, max_time, weight_time, min_temp, max_temp, weight_temp, min_uv, max_uv, weight_uv)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (user_id, None, None, None, None, None, None, None, None, None))  # Default preferences
+            INSERT INTO preferences (min_time, max_time, weight_time, min_temp, max_temp, weight_temp, min_uv, max_uv, weight_uv)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (None, None, None, None, None, None, None, None, None))
+        preferences_id = cursor.lastrowid
 
+        # Insert into session
         cursor.execute("""
-            INSERT INTO session (session_id, location, date, start_time, end_time, is_scheduled)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (user_id, None, None, None, None, None))  # Default session values
+            INSERT INTO session (location, date, start_time, end_time, is_scheduled)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (None, None, None, None, None))
+        session_id = cursor.lastrowid
 
-
-        # Insert into useraccount table
+        # Now insert into useraccount using those IDs
         cursor.execute("""
-            INSERT INTO useraccount (user_id, skin_type, created_at, progress_id, preferences_id, session_id)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (user_id, skin_type, created_at, user_id, user_id, user_id))
+            INSERT INTO useraccount (skin_type, created_at, progress_id, preferences_id, session_id)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (skin_type, created_at, progress_id, preferences_id, session_id))
+        user_id = cursor.lastrowid   
 
         conn.commit()
         cursor.close()
@@ -87,6 +89,23 @@ def add_user():
     except Exception as e:
         print(f"Error in /add-user: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
+    
+
+@app.route('/get-max-user-id', methods=['GET'])
+def get_max_user_id():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT MAX(user_id) FROM useraccount")
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        max_id = result[0] if result[0] is not None else 0
+        return jsonify({"max_user_id": max_id}), 200
+    except Exception as e:
+        print(f"Error fetching max user_id: {e}")
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     try:

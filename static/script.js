@@ -47,7 +47,24 @@ const addUserForm = document.getElementById('addUserForm');
 
 // Open the modal
 addUserButton.addEventListener('click', () => {
-  modal.style.display = 'block';
+  fetch('/get-max-user-id')
+    .then(res => res.json())
+    .then(data => {
+      const maxId = data.max_user_id;
+      console.log('Current highest user ID:', maxId);
+
+      // Optionally display next ID
+      const nextIdDisplay = document.getElementById('nextUserId');
+      if (nextIdDisplay) {
+        nextIdDisplay.textContent = `Next User ID: ${maxId + 1}`;
+      }
+
+      modal.style.display = 'block';
+    })
+    .catch(error => {
+      console.error('Error fetching max user ID:', error);
+      modal.style.display = 'block';  // still open the modal even if it fails
+    });
 });
 
 // Close the modal
@@ -117,7 +134,7 @@ addUserForm.addEventListener('submit', (event) => {
           // Add both rows to the table
           table.appendChild(row);
           table.appendChild(detailRow);
-          
+
           modal.style.display = 'none';
           addUserForm.reset();
         } else {
@@ -141,10 +158,9 @@ randomizeUserButton.addEventListener('click', () => {
     .then(response => response.json())
     .then(data => {
       console.log('Randomized User Data:', data);
-     if (data.user_id && data.skin_type && data.created_at) {
+     if (data.skin_type && data.created_at) {
         
         // Optionally, populate the form fields with the randomized data
-        document.getElementById('userId').value = data.user_id;
         document.getElementById('skinType').value = data.skin_type;
         document.getElementById('createdAt').value = data.created_at.split(' ');
       } else {
@@ -160,18 +176,16 @@ randomizeUserButton.addEventListener('click', () => {
 addUserForm.addEventListener('submit', (event) => {
   event.preventDefault();
 
-  const userId = document.getElementById('userId').value;
   const skinType = document.getElementById('skinType').value;
   const createdAt = document.getElementById('createdAt').value;
 
-  if (userId && skinType && createdAt) {
+  if (skinType && createdAt) {
     fetch('/add-user', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        user_id: userId,
         skin_type: skinType,
         created_at: createdAt,
       }),
@@ -183,13 +197,11 @@ addUserForm.addEventListener('submit', (event) => {
           const table = document.getElementById('userTable');
           const row = document.createElement('tr');
           row.innerHTML = `
-            <td>${userId}</td>
             <td>${createdAt}</td>
             <td>${skinType}</td>
           `;
           table.appendChild(row);
 
-          alert('User added successfully!');
           modal.style.display = 'none';
           addUserForm.reset();
         } else {
