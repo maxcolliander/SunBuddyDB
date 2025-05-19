@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Overview</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <h1>User Overview</h1>
+    <a href="{{ url_for('index') }}" class="return-btn" style="position:absolute;left:2rem;top:1.2rem;">&#8592; Return</a>
+  </header>
+  <main>
+    <section class="user-section">
+      <h2>User ID: <span id="userIdDisplay"></span></h2>
+      <div id="userData"></div>
+      <h3>Sessions</h3>
+      <div id="userSessions"></div>
+      <h3>Notifications</h3>
+      <div id="userNotifications"></div>
+      <h3>UV Exposure</h3>
+      <div id="userUvExposure"></div>
+    </section>
+  </main>
+  <script>
+    const userId = {{ user_id|tojson }};
+  </script>
+  <script src="{{ url_for('static', filename='user.js') }}"></script>
+</body>
+</html>

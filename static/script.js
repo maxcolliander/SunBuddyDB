@@ -1,44 +1,94 @@
-fetch('../users.json')
-  .then(res => res.json())
-  .then(users => {
-    const table = document.getElementById('userTable');
+const USERS_PER_PAGE = 20;
+let currentPage = 1;
+let totalUsers = 0;
+let sortBy = 'user_id';
+let sortOrder = 'asc';
 
-    users.forEach((user, index) => {
+function fetchAndDisplayUsers(page = 1) {
+  fetch(`/get-users?page=${page}&limit=${USERS_PER_PAGE}&sort_by=${sortBy}&sort_order=${sortOrder}`)
+    .then(res => res.json())
+    .then(data => {
+      const users = data.users;
+      totalUsers = data.total;
+      currentPage = data.page;
+
+      const table = document.getElementById('userTable');
+      table.innerHTML = '';
+      users.forEach(user => {
+      let createdAt = user.created_at;
+      if (createdAt) {
+        const dateObj = new Date(createdAt);
+        if (!isNaN(dateObj)) {
+          createdAt = dateObj.toISOString().slice(0, 10);
+        }
+      }
       const row = document.createElement('tr');
+      row.style.cursor = 'pointer';
       row.innerHTML = `
         <td>${user.user_id}</td>
-        <td>${user.created_at.split(" ")[0]}</td>
-        <td>${user.session.location}</td>
+        <td>${createdAt}</td>
       `;
-
-      // Create expandable detail row
-      const detailRow = document.createElement('tr');
-      detailRow.style.display = 'none';
-      detailRow.classList.add('detail-row');
-      detailRow.innerHTML = `
-        <td colspan="3">
-          <div class="user-details">
-            <p><strong>Skin Type:</strong> ${user.skin_type}</p>
-            <p><strong>Session:</strong> ${user.session.start_time} – ${user.session.end_time}</p>
-            <p><strong>Progress:</strong> Tan level ${user.progress.tan_level} on ${user.progress.date}</p>
-            <p><strong>Preferences:</strong> UV ${user.preferences.min_uv}–${user.preferences.max_uv}, Temp ${user.preferences.min_temp}–${user.preferences.max_temp}°C, Time ${user.preferences.min_time}–${user.preferences.max_time} min</p>
-          </div>
-        </td>
-      `;
-
-      // Toggle expansion on click
       row.addEventListener('click', () => {
-        detailRow.style.display = detailRow.style.display === 'none' ? 'table-row' : 'none';
+        window.location.href = `/user/${user.user_id}`;
       });
-
-      // Add both rows
       table.appendChild(row);
-      table.appendChild(detailRow);
     });
-  })
-  .catch(err => {
-    console.error("Failed to load users.json:", err);
-  });
+
+      renderPagination();
+    })
+    .catch(error => {
+      console.error('Error fetching users:', error);
+    });
+}
+
+function renderTableHeader() {
+  const thead = document.querySelector('#userTable').parentElement.querySelector('thead tr');
+  thead.innerHTML = `
+    <th id="sortUserId" style="cursor:pointer">User ID ${sortBy === 'user_id' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}</th>
+    <th id="sortCreatedAt" style="cursor:pointer">Created At ${sortBy === 'created_at' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}</th>
+  `;
+
+  document.getElementById('sortUserId').onclick = () => {
+    if (sortBy === 'user_id') {
+      sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+    } else {
+      sortBy = 'user_id';
+      sortOrder = 'asc';
+    }
+    fetchAndDisplayUsers(1);
+    renderTableHeader();
+  };
+
+  document.getElementById('sortCreatedAt').onclick = () => {
+    if (sortBy === 'created_at') {
+      sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+    } else {
+      sortBy = 'created_at';
+      sortOrder = 'asc';
+    }
+    fetchAndDisplayUsers(1);
+    renderTableHeader();
+  };
+}
+
+function renderPagination() {
+  const pagination = document.getElementById('pagination');
+  pagination.innerHTML = '';
+  const totalPages = Math.ceil(totalUsers / USERS_PER_PAGE);
+
+  for (let i = 1; i <= totalPages; i++) {
+    const btn = document.createElement('button');
+    btn.textContent = i;
+    btn.disabled = i === currentPage;
+    btn.addEventListener('click', () => fetchAndDisplayUsers(i));
+    pagination.appendChild(btn);
+  }
+}
+// Initial load
+window.addEventListener('DOMContentLoaded', () => {
+  renderTableHeader();
+  fetchAndDisplayUsers();
+});
 
 const modal = document.getElementById('addUserModal');
 const addUserButton = document.getElementById('addUserButton');
@@ -194,13 +244,7 @@ addUserForm.addEventListener('submit', (event) => {
       .then((data) => {
         if (data.success) {
           // Add the new user to the table dynamically
-          const table = document.getElementById('userTable');
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${createdAt}</td>
-            <td>${skinType}</td>
-          `;
-          table.appendChild(row);
+          fetchAndDisplayUsers(currentPage);
 
           modal.style.display = 'none';
           addUserForm.reset();

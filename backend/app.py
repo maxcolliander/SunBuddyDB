@@ -26,6 +26,10 @@ def get_connection():
 def index():
     return render_template('index.html')
 
+@app.route('/user/<int:user_id>')
+def user_page(user_id):
+    return render_template('user.html', user_id=user_id)
+
 @app.route('/randomize-user', methods=['POST'])
 def randomize_user():
     """Generate random user data."""
@@ -105,6 +109,43 @@ def get_max_user_id():
         return jsonify({"max_user_id": max_id}), 200
     except Exception as e:
         print(f"Error fetching max user_id: {e}")
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/get-users', methods=['GET'])
+def get_users():
+    try:
+        page = int(request.args.get('page', 1))
+        limit = int(request.args.get('limit', 20))
+        offset = (page - 1) * limit
+
+        # Sorting
+        allowed_sort = {'user_id', 'created_at'}
+        sort_by = request.args.get('sort_by', 'user_id')
+        sort_order = request.args.get('sort_order', 'asc')
+        if sort_by not in allowed_sort:
+            sort_by = 'user_id'
+        if sort_order not in {'asc', 'desc'}:
+            sort_order = 'asc'
+
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT COUNT(*) as total FROM useraccount")
+        total = cursor.fetchone()['total']
+
+        query = f"SELECT * FROM useraccount ORDER BY {sort_by} {sort_order.upper()} LIMIT %s OFFSET %s"
+        cursor.execute(query, (limit, offset))
+        users = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        return jsonify({
+            "users": users,
+            "total": total,
+            "page": page,
+            "limit": limit
+        }), 200
+    except Exception as e:
+        print(f"Error fetching users: {e}")
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':

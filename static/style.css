@@ -209,4 +209,46 @@ button:hover {
   cursor: pointer;
 }
 
+#pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+#pagination button {
+  background-color: #f7c59f;
+  border: 1px solid #e0a96d;
+  color: #333;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s, color 0.2s;
+}
+
+#pagination button:disabled {
+  background-color: #e0a96d;
+  color: #fff;
+  cursor: default;
+  font-weight: bold;
+}
+
+#pagination button:not(:disabled):hover {
+  background-color: #f4b16e;
+  color: #222;
+}
+
+.return-btn {
+  background: var(--accent);
+  color: #fff;
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+.return-btn:hover {
+  background: #c97350;
+}
 
