@@ -57,33 +57,74 @@ def add_user():
         conn = get_connection()
         cursor = conn.cursor()
 
-        # Insert into progressData (let DB assign ID)
-        cursor.execute("""
-            INSERT INTO progressData (tan_level, date)
-            VALUES (%s, %s)
-        """, (None, None))
-        progress_id = cursor.lastrowid
+        cursor.execute("SELECT IFNULL(MAX(user_id), 0) + 1 FROM useraccount")
+        user_id = cursor.fetchone()[0]
 
-        # Insert into preferences
+        cursor.execute("""
+            INSERT INTO useraccount (skin_type, created_at, progress_id, preferences_id, session_id)
+            VALUES (%s, %s, NULL, NULL, NULL)
+        """, (skin_type, created_at))
+        user_id = cursor.lastrowid
+
+        # Insert into progressData (let DB assign ID)
+        for i in range(5):
+            progress = data_simulation.simulate_progressdata(user_id)
+            cursor.execute("""
+                INSERT INTO progressData (user_id, tan_level, date)
+                VALUES (%s, %s, %s)
+            """, (user_id, progress[1], progress[2]))
+            progress_id = cursor.lastrowid
+            print("Progress: ", progress)
+        
+
+        # Insert into preferences¨
+        preferences = data_simulation.simulate_preferences(user_id)
         cursor.execute("""
             INSERT INTO preferences (min_time, max_time, weight_time, min_temp, max_temp, weight_temp, min_uv, max_uv, weight_uv)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (None, None, None, None, None, None, None, None, None))
+        """, preferences[1:])
         preferences_id = cursor.lastrowid
+        print("Preferences: ", preferences)
 
         # Insert into session
-        cursor.execute("""
-            INSERT INTO session (location, date, start_time, end_time, is_scheduled)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (None, None, None, None, None))
-        session_id = cursor.lastrowid
+        session_ids = []
+        for i in range(10):
+            session = data_simulation.simulate_session(None, None, progress_id)
+            location = session[3]
+            date = session[4]
 
-        # Now insert into useraccount using those IDs
+            # Ensure weatherData exists for this location and date
+            cursor.execute("""
+                SELECT 1 FROM weatherData WHERE location = %s AND date = %s
+            """, (location, date))
+            if not cursor.fetchone():
+                # Simulate weather data (adjust this function as needed)
+                weather_key, location, date, uv_index_per_hour, temp_per_hour, weather_condition = data_simulation.simulate_weatherdata(location, date)
+                cursor.execute("""
+                    INSERT INTO weatherData (weatherkey, location, date, uv_index_per_hour, temp_per_hour, weather_condition)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """, (weather_key, location, date, uv_index_per_hour, temp_per_hour, weather_condition))
+
+            cursor.execute("""
+                INSERT INTO session (user_id, location, date, start_time, end_time, is_scheduled)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (user_id, location, date, session[5], session[6], session[7]))
+            session_ids.append(cursor.lastrowid)
+            print("Session: ", session)
+
+        for i in range(10):
+            notification = data_simulation.simulate_notifications(None, user_id)
+            cursor.execute("""
+                INSERT INTO notifications (user_id, message, created_at, is_read)
+                VALUES (%s, %s, %s, %s)
+            """, notification[1:])
+            print("Notification: ", notification)
+        
         cursor.execute("""
-            INSERT INTO useraccount (skin_type, created_at, progress_id, preferences_id, session_id)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (skin_type, created_at, progress_id, preferences_id, session_id))
-        user_id = cursor.lastrowid   
+            UPDATE useraccount
+            SET progress_id = %s, preferences_id = %s, session_id = %s
+            WHERE user_id = %s
+        """, (progress_id, preferences_id, session_ids[0], user_id))
 
         conn.commit()
         cursor.close()

@@ -4,11 +4,12 @@ import json
 import math
 
 def simulate_preferences(preferences_id):
-    max_time = random.choice(range(30, 601, 15))
-    min_time = random.choice(range(0, 301, 15))
+    now = datetime.now()
+    min_time = (now + timedelta(minutes=random.randint(0, 300))).strftime('%Y-%m-%d %H:%M:%S')
+    max_time = (now + timedelta(minutes=random.randint(301, 600))).strftime('%Y-%m-%d %H:%M:%S')
     weight_time = random.choice([1, 2, 3])
-    max_temp = random.choice(range(10, 41, 1))
     min_temp = random.choice(range(0, 21, 1))
+    max_temp = random.choice(range(10, 41, 1))
     weight_temp = random.choice([1, 2, 3])
     min_uv = random.choice(range(0, 6, 1))
     max_uv = random.choice(range(2, 15, 1))
@@ -41,7 +42,7 @@ def simulate_session(session_id, scheduled_id, progress_id):
     start_time = f"{date} {time_start}"
     end_time = f"{date} {time_end}"
     is_scheduled = random.choice([True, False])
-    return[session_id, scheduled_id, progress_id, location, start_time, end_time, is_scheduled]
+    return[session_id, scheduled_id, progress_id, location, date, start_time, end_time, is_scheduled]
 
 def simulate_notifications(notifications_id, user_id):
     message = random.choice(["Your tanning session starts in 30 minutes, get ready!", 
@@ -77,42 +78,51 @@ def simulate_useraccount(progress_id=None, session_id=None, preferences_id=None)
     created_at = start_time
     return [skin_type, created_at, progress_id, session_id, preferences_id]
 
-def simulate_weatherdata(weather_key):
-    location = random.choice(["Los Angeles", "Karlskrona", "Falkenberg", "Toronto", "Stockholm", "Madrid", "Paris", "Rom", "Oslo", "Copenhagen", "Washington"])
-    start_date = datetime(2025, 1, 1)
-    random_days = random.randint(0, (datetime(2030, 12, 31) - start_date).days)
-    random_date = start_date + timedelta(days=random_days)
+def simulate_weatherdata(location, date):
+    if location is None:
+        location = random.choice([
+            "Los Angeles", "Karlskrona", "Falkenberg", "Toronto", "Stockholm",
+            "Madrid", "Paris", "Rom", "Oslo", "Copenhagen", "Washington"
+        ])
+    if date is None:
+        start_date = datetime(2025, 1, 1)
+        random_days = random.randint(0, (datetime(2030, 12, 31) - start_date).days)
+        random_date = start_date + timedelta(days=random_days)
+        date = random_date.strftime('%Y-%m-%d')
+
     weather_condition = random.choice(["Sunny", "Partly cloudy", "Cloudy", "Rainy", "Windy"])
 
-    # Temp
+        # Temp
     temperatures = {}
-    base_temp = random.uniform(10, 20)  # base average temperature (°C)
-    amplitude = random.uniform(5, 10)   # variation during the day
-
+    base_temp = random.uniform(10, 20)
+    amplitude = random.uniform(5, 10)
     for hour in range(24):
-        # Use a cosine wave to simulate daily temperature curve
         temp = base_temp + amplitude * math.cos((hour - 14) * math.pi / 12)
-        # Add small random noise
         temp += random.uniform(-1.5, 1.5)
-        temperatures[hour] = round(temp, 1)
+        temperatures[str(hour)] = round(temp, 1)
 
     # UV
     uv_index = {}
-    peak_uv = random.uniform(6, 10)  # Max UV for the day (can vary with weather/season)
-
+    peak_uv = random.uniform(6, 10)
     for hour in range(24):
-        # UV is generally 0 outside 6 AM to 7 PM
         if 6 <= hour <= 19:
-            # Simulate a UV curve peaking around 13:00 (1 PM)
             uv = peak_uv * math.exp(-((hour - 13) ** 2) / 8)
-            # Add small random noise
             uv += random.uniform(-0.3, 0.3)
-            uv = max(0, uv)  # Ensure no negative UV
+            uv = max(0, uv)
         else:
             uv = 0.0
-        uv_index[hour] = round(uv, 1)
+        uv_index[str(hour)] = round(uv, 1)
+    
+    weather_key = f"{location}_{date}"
 
-    return [weather_key, location, random_date.strftime('%Y-%m-%d'), uv_index, temperatures, weather_condition]
+    return [
+        weather_key,
+        location,
+        date,
+        json.dumps(uv_index),
+        json.dumps(temperatures),
+        weather_condition
+    ]
 
 
 if __name__ == "__main__":

@@ -1,9 +1,3 @@
-CREATE TABLE progressData (
-  progress_id INT AUTO_INCREMENT PRIMARY KEY,
-  tan_level INT,
-  date DATE
-);
-
 CREATE TABLE preferences (
   preferences_id INT AUTO_INCREMENT PRIMARY KEY,
   min_time TIMESTAMP,
@@ -17,8 +11,27 @@ CREATE TABLE preferences (
   weight_uv INT
 );
 
+CREATE TABLE useraccount (
+  user_id INT AUTO_INCREMENT PRIMARY KEY,
+  skin_type INT,
+  created_at DATE,
+  progress_id INT,
+  preferences_id INT,
+  session_id INT,
+  FOREIGN KEY (preferences_id) REFERENCES preferences(preferences_id)
+);
+
+CREATE TABLE progressData (
+  progress_id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  tan_level INT,
+  date DATE,
+  FOREIGN KEY (user_id) REFERENCES useraccount(user_id)
+);
+
 CREATE TABLE session (
   session_id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
   location VARCHAR(100),
   date DATE,
   start_time TIMESTAMP,
@@ -26,35 +39,29 @@ CREATE TABLE session (
   is_scheduled BOOLEAN
 );
 
-CREATE TABLE useraccount (
-  user_id INT AUTO_INCREMENT PRIMARY KEY,
-  skin_type INT,
-  created_at DATE,
-  progress_id INT NOT NULL,
-  preferences_id INT NOT NULL,
-  session_id INT NOT NULL,
-  FOREIGN KEY (progress_id) REFERENCES progressData(progress_id),
-  FOREIGN KEY (preferences_id) REFERENCES preferences(preferences_id),
-  FOREIGN KEY (session_id) REFERENCES session(session_id)
-);
-
 CREATE TABLE weatherData (
+  weatherkey VARCHAR(255) PRIMARY KEY,
   location VARCHAR(100),
   date DATE,
   uv_index_per_hour JSON,
   temp_per_hour JSON,
-  weather_condition VARCHAR(100),
-  PRIMARY KEY (location, date)
+  weather_condition VARCHAR(100)
 );
 
 CREATE TABLE notifications (
-  notifications_id INT PRIMARY KEY,
+  notifications_id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT,
   message TEXT,
-  created_at TIMESTAMP,
-  is_read BOOLEAN,
-  FOREIGN KEY (user_id) REFERENCES useraccount(user_id)
+  created_at DATETIME,
+  is_read BOOLEAN
 );
+
+DROP TABLE IF EXISTS progressData;
+DROP TABLE IF EXISTS notifications;
+DROP TABLE IF EXISTS weatherData;
+DROP TABLE IF EXISTS useraccount;
+DROP TABLE IF EXISTS session;
+DROP TABLE IF EXISTS preferences
 
 -- loadUserPreviousSessions
 SELECT 
