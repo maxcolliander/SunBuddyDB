@@ -252,3 +252,69 @@ button:hover {
   background: #c97350;
 }
 
+#userPreferences input {
+  display: block;
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  margin-top: 0.2rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+}
+
+#userPreferences input:focus {
+  border-color: #3399ff;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(51, 153, 255, 0.2);
+}
+
+.snackbar {
+  position: sticky;
+  bottom: 20px;
+  background-color: #fefefe;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+  align-items: center; 
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
+  z-index: 999;
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.snackbar button {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+  position: relative;
+  top: -7px; 
+}
+
+.snackbar button:hover {
+  background-color: #0056b3;
+}
+
+.snackbar.hidden {
+  display: none;
+}
+
+.snackbar-message {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+}

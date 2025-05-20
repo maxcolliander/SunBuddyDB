@@ -1,24 +1,25 @@
-CREATE TABLE preferences (
-  preferences_id INT AUTO_INCREMENT PRIMARY KEY,
-  min_time TIMESTAMP,
-  max_time TIMESTAMP,
-  weight_time INT,
-  min_temp INT,
-  max_temp INT,
-  weight_temp INT,
-  min_uv INT,
-  max_uv INT,
-  weight_uv INT
-);
-
 CREATE TABLE useraccount (
   user_id INT AUTO_INCREMENT PRIMARY KEY,
   skin_type INT,
   created_at DATE,
   progress_id INT,
   preferences_id INT,
-  session_id INT,
-  FOREIGN KEY (preferences_id) REFERENCES preferences(preferences_id)
+  session_id INT
+);
+
+CREATE TABLE preferences (
+  preferences_id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  min_time INT,
+  max_time INT,
+  weight_time INT,
+  min_temp INT,
+  max_temp INT,
+  weight_temp INT,
+  min_uv INT,
+  max_uv INT,
+  weight_uv INT,
+  FOREIGN KEY (user_id) REFERENCES useraccount(user_id)
 );
 
 CREATE TABLE progressData (
@@ -162,3 +163,5 @@ JOIN useraccount u ON s.session_id = u.session_id
 WHERE s.is_scheduled = FALSE
 GROUP BY u.user_id
 ORDER BY u.user_id;
+
+SELECT * FROM preferences WHERE user_id = 1;

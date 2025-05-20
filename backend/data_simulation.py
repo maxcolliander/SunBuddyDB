@@ -4,9 +4,8 @@ import json
 import math
 
 def simulate_preferences(preferences_id):
-    now = datetime.now()
-    min_time = (now + timedelta(minutes=random.randint(0, 300))).strftime('%Y-%m-%d %H:%M:%S')
-    max_time = (now + timedelta(minutes=random.randint(301, 600))).strftime('%Y-%m-%d %H:%M:%S')
+    min_time = random.choice(range(15, 240, 1))
+    max_time = random.choice(range(min_time, 481, 1))
     weight_time = random.choice([1, 2, 3])
     min_temp = random.choice(range(0, 21, 1))
     max_temp = random.choice(range(10, 41, 1))

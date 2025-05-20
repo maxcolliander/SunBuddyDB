@@ -21,7 +21,17 @@
       <h3>UV Exposure</h3>
       <div id="userUvExposure"></div>
     </section>
+
+    <section class="preferences-section">
+      <h2>User Preferences</h2>
+      <div id="userPreferences"></div>
+    </section>
   </main>
+  <div id="preferenceSnackbar" class="snackbar hidden">
+    <div class="snackbar-message">Changes have been made</div>
+    <button id="savePrefs">Save</button>
+    <button id="discardPrefs">Discard</button>
+  </div>
   <script>
     const userId = {{ user_id|tojson }};
   </script>

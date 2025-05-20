@@ -80,9 +80,9 @@ def add_user():
         # Insert into preferences¨
         preferences = data_simulation.simulate_preferences(user_id)
         cursor.execute("""
-            INSERT INTO preferences (min_time, max_time, weight_time, min_temp, max_temp, weight_temp, min_uv, max_uv, weight_uv)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, preferences[1:])
+            INSERT INTO preferences (user_id, min_time, max_time, weight_time, min_temp, max_temp, weight_temp, min_uv, max_uv, weight_uv)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (user_id, *preferences[1:]))
         preferences_id = cursor.lastrowid
         print("Preferences: ", preferences)
 
@@ -188,6 +188,70 @@ def get_users():
     except Exception as e:
         print(f"Error fetching users: {e}")
         return jsonify({"error": str(e)}), 500
+    
+@app.route('/api/user/<int:user_id>/preferences', methods=['GET'])
+def get_user_preferences(user_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT min_time, max_time, weight_time,
+               min_temp, max_temp, weight_temp,
+               min_uv, max_uv, weight_uv
+        FROM preferences
+        WHERE user_id = %s
+    """, (user_id,))
+    result = cursor.fetchone()
+    cursor.close()
+    print(result)
+
+    if result:
+        return jsonify(result)
+    else:
+        return jsonify({"error": "Preferences not found"}), 404
+    
+@app.route('/api/user/<int:user_id>/preferences', methods=['PUT'])
+def update_user_preferences(user_id):
+    data = request.get_json()
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT preferences_id FROM preferences WHERE user_id = %s", (user_id,))
+    row = cursor.fetchone()
+    if not row:
+        return jsonify({"error": "No preferences found for user"}), 404
+
+    preferences_id = row[0]
+
+    cursor.execute("""
+        UPDATE preferences
+        SET min_time = %s,
+            max_time = %s,
+            weight_time = %s,
+            min_temp = %s,
+            max_temp = %s,
+            weight_temp = %s,
+            min_uv = %s,
+            max_uv = %s,
+            weight_uv = %s
+        WHERE preferences_id = %s
+    """, (
+        data['min_time'],
+        data['max_time'],
+        data['weight_time'],
+        data['min_temp'],
+        data['max_temp'],
+        data['weight_temp'],
+        data['min_uv'],
+        data['max_uv'],
+        data['weight_uv'],
+        preferences_id
+    ))
+
+    conn.commit()
+    cursor.close()
+
+    return jsonify({"message": "Preferences updated successfully"}), 200
 
 if __name__ == '__main__':
     try:
