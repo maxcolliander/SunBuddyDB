@@ -30,16 +30,19 @@ def simulate_session(session_id, scheduled_id, progress_id):
     random_days = random.randint(0, delta.days)
     random_date = start_date + timedelta(days=random_days)
     date = random_date.strftime('%Y-%m-%d')
-    hours_start = random.randint(0, 23)
-    minutes_start = random.randint(0, 59)
-    seconds_start = random.randint(0, 59)
-    time_start = f"{hours_start:02}:{minutes_start:02}:{seconds_start:02}"
-    hours_end = random.randint(0, 23)
-    minutes_end = random.randint(0, 59)
-    seconds_end = random.randint(0, 59)
-    time_end = f"{hours_end:02}:{minutes_end:02}:{seconds_end:02}"
-    start_time = f"{date} {time_start}"
-    end_time = f"{date} {time_end}"
+    # Assume `date` is a string in YYYY-MM-DD format
+    date_obj = datetime.strptime(date, "%Y-%m-%d")
+
+    # Random start time
+    start_minutes = random.randint(0, 23 * 60 + 30)  # allow up to 23:30
+    start_dt = date_obj + timedelta(minutes=start_minutes)
+
+    duration = random.randint(15, 480)
+    end_dt = start_dt + timedelta(minutes=duration)
+
+    # Format timestamps
+    start_time = start_dt.strftime("%Y-%m-%d %H:%M:%S")
+    end_time = end_dt.strftime("%Y-%m-%d %H:%M:%S")
     is_scheduled = random.choice([True, False])
     return[session_id, scheduled_id, progress_id, location, date, start_time, end_time, is_scheduled]
 

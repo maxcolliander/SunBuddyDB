@@ -253,6 +253,51 @@ def update_user_preferences(user_id):
 
     return jsonify({"message": "Preferences updated successfully"}), 200
 
+@app.route('/api/user/<int:user_id>/sessions')
+def get_user_sessions(user_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT session_id, location, date, is_scheduled
+        FROM session
+        WHERE user_id = %s
+        ORDER BY date DESC
+    """, (user_id,))
+
+    sessions = cursor.fetchall()
+    cursor.close()
+    return jsonify(sessions)
+
+@app.route('/api/session/<int:session_id>/details')
+def get_session_details(session_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT 
+            s.session_id,
+            s.date,
+            s.start_time,
+            s.end_time,
+            s.location,
+            w.uv_index_per_hour,
+            w.temp_per_hour
+        FROM session s
+        JOIN weatherData w 
+          ON s.location = w.location 
+          AND s.date = w.date
+        WHERE s.session_id = %s
+    """, (session_id,))
+    
+    result = cursor.fetchone()
+    cursor.close()
+
+    if result:
+        return jsonify(result)
+    else:
+        return jsonify({"error": "Session not found"}), 404
+
 if __name__ == '__main__':
     try:
         conn = get_connection()

@@ -318,3 +318,73 @@ button:hover {
   padding: 0;
   margin: 0;
 }
+
+.session-toggle-buttons {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.session-toggle-buttons button {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #ccc;
+  background-color: #f2f2f2;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.session-toggle-buttons button.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.hidden {
+  display: none;
+}
+
+.sessions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  margin-top: -1rem;
+}
+
+.sessions-header h2 {
+  margin: 0;
+}
+
+.session-card {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.8rem;
+  margin-bottom: 1rem;
+  background-color: #fefefe;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.session-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.session-summary button {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin-top: 0rem;
+}
+
+.session-details {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #eee;
+}
+
+.hidden {
+  display: none;
+}

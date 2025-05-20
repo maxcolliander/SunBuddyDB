@@ -183,4 +183,101 @@ window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('userPreferences').textContent = "Error loading preferences.";
       console.error("Preferences fetch error:", error);
     });
+
+    // For buttons in the sessions section to toggle previous/scheduled sessions
+    document.getElementById('recordedBtn').addEventListener('click', () => {
+      document.getElementById('recordedSessions').classList.remove('hidden');
+      document.getElementById('upcomingSessions').classList.add('hidden');
+      document.getElementById('recordedBtn').classList.add('active');
+      document.getElementById('upcomingBtn').classList.remove('active');
+    });
+    
+    document.getElementById('upcomingBtn').addEventListener('click', () => {
+      document.getElementById('recordedSessions').classList.add('hidden');
+      document.getElementById('upcomingSessions').classList.remove('hidden');
+      document.getElementById('recordedBtn').classList.remove('active');
+      document.getElementById('upcomingBtn').classList.add('active');
+    });
+
+    document.querySelectorAll('.toggle-details').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const card = btn.closest('.session-card');
+        const details = card.querySelector('.session-details');
+        details.classList.toggle('hidden');
+        btn.textContent = details.classList.contains('hidden') ? 'Details' : 'Hide';
+      });
+    });
+    fetch(`/api/user/${userId}/sessions`)
+    .then(res => res.json())
+    .then(sessions => {
+      const recordedContainer = document.getElementById('recordedSessions');
+      const upcomingContainer = document.getElementById('upcomingSessions');
+
+      recordedContainer.innerHTML = '';
+      upcomingContainer.innerHTML = '';
+
+      sessions.forEach(session => {
+        const div = document.createElement('div');
+        div.className = 'session-card';
+        const formatted = new Date(session.date).toLocaleDateString("en-GB", {
+          year: "numeric",
+          month: "short",
+          day: "numeric"
+        });
+        const summaryHTML = `
+          <div class="session-summary" data-session-id="${session.session_id}">
+            <span><strong>Location:</strong> ${session.location}</span>
+            <span><strong>Date:</strong> ${formatted}</span>
+            <button class="toggle-details">Details</button>
+          </div>
+          <div class="session-details hidden"></div>
+        `;
+
+        div.innerHTML = summaryHTML;
+
+        // Append to correct container
+        if (session.is_scheduled) {
+          upcomingContainer.appendChild(div);
+        } else {
+          recordedContainer.appendChild(div);
+        }
+      });
+
+
+      document.querySelectorAll('.toggle-details').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const card = btn.closest('.session-card');
+          const details = card.querySelector('.session-details');
+          const sessionId = card.querySelector('.session-summary').dataset.sessionId;
+      
+          // If currently hidden, show and fetch if needed
+          if (details.classList.contains('hidden')) {
+            if (details.innerHTML.trim() === '') {
+              fetch(`/api/session/${sessionId}/details`)
+                .then(res => res.json())
+                .then(data => {
+                  details.innerHTML = `
+                    <p><strong>Start:</strong> ${formatTime(data.start_time)}</p>
+                    <p><strong>End:</strong> ${formatTime(data.end_time)}</p>
+                    <p><strong>UV Index / Hour:</strong> ${data.uv_index_per_hour}</p>
+                    <p><strong>Temperature / Hour:</strong> ${data.temp_per_hour}</p>
+                  `;
+                });
+            }
+      
+            details.classList.remove('hidden');
+            btn.textContent = 'Hide';
+          } else {
+            // Already expanded → hide it
+            details.classList.add('hidden');
+            btn.textContent = 'Details';
+          }
+        });
+      });      
+  });
 });
+
+function formatTime(isoString) {
+  const time = new Date(isoString);
+  return time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}

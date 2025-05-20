@@ -14,12 +14,23 @@
     <section class="user-section">
       <h2>User ID: <span id="userIdDisplay"></span></h2>
       <div id="userData"></div>
-      <h3>Sessions</h3>
-      <div id="userSessions"></div>
       <h3>Notifications</h3>
       <div id="userNotifications"></div>
       <h3>UV Exposure</h3>
       <div id="userUvExposure"></div>
+    </section>
+
+    <section class="sessions-section">
+      <div class="sessions-header">
+        <h2>Sessions</h2>
+        <div class="session-toggle-buttons">
+          <button id="recordedBtn" class="active">Recorded Sessions</button>
+          <button id="upcomingBtn">Upcoming Sessions</button>
+        </div>
+      </div>
+    
+      <div id="recordedSessions"></div>
+      <div id="upcomingSessions" class="hidden"></div>
     </section>
 
     <section class="preferences-section">
