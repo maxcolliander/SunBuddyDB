@@ -304,6 +304,61 @@ def get_session_details(session_id):
     else:
         return jsonify({"error": "Session not found"}), 404
 
+# All routes for notifications
+@app.route('/api/user/<int:user_id>/notifications')
+def get_user_notifications(user_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT notifications_id, message, created_at, is_read
+        FROM notifications
+        WHERE user_id = %s
+        ORDER BY created_at DESC
+    """, (user_id,))
+    
+    results = cursor.fetchall()
+    cursor.close()
+    return jsonify(results)
+
+@app.route('/api/notification/<int:notification_id>/read', methods=['POST'])
+def mark_notification_as_read(notification_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE notifications
+        SET is_read = TRUE
+        WHERE notifications_id = %s
+    """, (notification_id,))
+    conn.commit()
+    cursor.close()
+    return jsonify({"status": "ok"})
+
+@app.route('/api/notification/<int:notification_id>', methods=['DELETE'])
+def delete_notification(notification_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        DELETE FROM notifications
+        WHERE notifications_id = %s
+    """, (notification_id,))
+    conn.commit()
+    cursor.close()
+    return jsonify({"status": "deleted"})
+
+@app.route('/api/user/<int:user_id>/notifications/read_all', methods=['POST'])
+def mark_all_notifications_as_read(user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE notifications
+        SET is_read = TRUE
+        WHERE user_id = %s AND is_read = FALSE
+    """, (user_id,))
+    conn.commit()
+    cursor.close()
+    return jsonify({"status": "all read"})
+
 if __name__ == '__main__':
     try:
         conn = get_connection()

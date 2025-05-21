@@ -346,11 +346,74 @@ window.addEventListener('DOMContentLoaded', () => {
             btn.textContent = 'Details';
           }
         });
-      });      
+      }); 
+      loadNotifications(); 
+      document.getElementById('markAllReadBtn').addEventListener('click', () => {
+        fetch(`/api/user/${userId}/notifications/read_all`, { method: 'POST' })
+          .then(() => loadNotifications());
+      });
   });
 });
+
+function loadNotifications() {
+  fetch(`/api/user/${userId}/notifications`)
+    .then(res => res.json())
+    .then(notifications => {
+      const container = document.getElementById('userNotifications');
+      container.innerHTML = '';
+
+      notifications.forEach(n => {
+        const div = document.createElement('div');
+        div.className = 'notification-item';
+        div.innerHTML = `
+          <div class="notification-row">
+            <div class="notification-content">
+              <p><strong>${formatDateTime(n.created_at)}</strong></p>
+              <p>${n.message}</p>
+            </div>
+            <button 
+              class="notification-action" 
+              data-id="${n.notifications_id}" 
+              data-read="${n.is_read ? 'true' : 'false'}">
+              ${n.is_read ? 'Delete' : 'Mark as Read'}
+            </button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+
+      document.querySelectorAll('.notification-action').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.id;
+          const isReadNow = btn.dataset.read === 'true'; // evaluate on click
+      
+          const action = isReadNow
+            ? fetch(`/api/notification/${id}`, { method: 'DELETE' })
+            : fetch(`/api/notification/${id}/read`, { method: 'POST' });
+      
+          action
+            .then(res => {
+              if (!res.ok) throw new Error("Failed request");
+              return res.json();
+            })
+            .then(() => loadNotifications())
+            .catch(err => console.error("Notification action failed:", err));
+        });
+      });
+    });
+}
+
+
 
 function formatTime(isoString) {
   const time = new Date(isoString);
   return time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function formatDateTime(datetimeString) {
+  const d = new Date(datetimeString);
+  return d.toLocaleString(undefined, {
+    year: 'numeric', month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
 }

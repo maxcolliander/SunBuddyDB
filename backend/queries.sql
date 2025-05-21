@@ -57,12 +57,13 @@ CREATE TABLE notifications (
   is_read BOOLEAN
 );
 
+DROP TABLE IF EXISTS preferences;
 DROP TABLE IF EXISTS progressData;
 DROP TABLE IF EXISTS notifications;
 DROP TABLE IF EXISTS weatherData;
 DROP TABLE IF EXISTS useraccount;
 DROP TABLE IF EXISTS session;
-DROP TABLE IF EXISTS preferences
+
 
 -- loadUserPreviousSessions
 SELECT 
@@ -164,4 +165,4 @@ WHERE s.is_scheduled = FALSE
 GROUP BY u.user_id
 ORDER BY u.user_id;
 
-SELECT * FROM preferences WHERE user_id = 1;
+SELECT * FROM notifications WHERE user_id = 1;
