@@ -95,7 +95,6 @@ const addUserButton = document.getElementById('addUserButton');
 const closeButton = document.querySelector('.close-button');
 const addUserForm = document.getElementById('addUserForm');
 
-// Open the modal
 addUserButton.addEventListener('click', () => {
   fetch('/get-max-user-id')
     .then(res => res.json())
@@ -103,7 +102,6 @@ addUserButton.addEventListener('click', () => {
       const maxId = data.max_user_id;
       console.log('Current highest user ID:', maxId);
 
-      // Optionally display next ID
       const nextIdDisplay = document.getElementById('nextUserId');
       if (nextIdDisplay) {
         nextIdDisplay.textContent = `Next User ID: ${maxId + 1}`;
@@ -113,23 +111,20 @@ addUserButton.addEventListener('click', () => {
     })
     .catch(error => {
       console.error('Error fetching max user ID:', error);
-      modal.style.display = 'block';  // still open the modal even if it fails
+      modal.style.display = 'block';
     });
 });
 
-// Close the modal
 closeButton.addEventListener('click', () => {
   modal.style.display = 'none';
 });
 
-// Close the modal when clicking outside of it
 window.addEventListener('click', (event) => {
   if (event.target === modal) {
     modal.style.display = 'none';
   }
 });
 
-// Handle form submission
 addUserForm.addEventListener('submit', (event) => {
   event.preventDefault();
 
@@ -202,7 +197,6 @@ addUserForm.addEventListener('submit', (event) => {
 
 const randomizeUserButton = document.getElementById('randomizeUserButton');
 
-// Handle randomize user data button click
 randomizeUserButton.addEventListener('click', () => {
   fetch('/randomize-user', { method: 'POST' })
     .then(response => response.json())
@@ -210,7 +204,6 @@ randomizeUserButton.addEventListener('click', () => {
       console.log('Randomized User Data:', data);
      if (data.skin_type && data.created_at) {
         
-        // Optionally, populate the form fields with the randomized data
         document.getElementById('skinType').value = data.skin_type;
         document.getElementById('createdAt').value = data.created_at.split(' ');
       } else {

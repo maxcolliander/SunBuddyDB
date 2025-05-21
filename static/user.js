@@ -1,34 +1,22 @@
 window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('userIdDisplay').textContent = userId;
 
+  // User info
   fetch(`/api/user/${userId}`)
     .then(res => res.json())
     .then(user => {
+      const userDataDiv = document.getElementById('userData');
       if (user.error) {
-        document.getElementById('userData').innerHTML = `<em>${user.error}</em>`;
+        userDataDiv.innerHTML = `<em>${user.error}</em>`;
         return;
       }
-      document.getElementById('userData').innerHTML = `
+      userDataDiv.innerHTML = `
         <p><strong>Skin Type:</strong> ${user.skin_type}</p>
         <p><strong>Created At:</strong> ${user.created_at}</p>
       `;
     });
 
-  fetch(`/api/user/${userId}/sessions`)
-    .then(res => res.json())
-    .then(data => {
-      const div = document.getElementById('userSessions');
-      if (data.sessions && data.sessions.length) {
-        div.innerHTML = data.sessions.map(s =>
-          `<div>
-            <strong>Date:</strong> ${s.date}, <strong>Start:</strong> ${s.start_time}, <strong>End:</strong> ${s.end_time}, <strong>Location:</strong> ${s.location}
-          </div>`
-        ).join('');
-      } else {
-        div.innerHTML = '<em>No sessions found.</em>';
-      }
-    });
-
+  // Notifications
   fetch(`/api/user/${userId}/notifications`)
     .then(res => res.json())
     .then(data => {
@@ -44,6 +32,7 @@ window.addEventListener('DOMContentLoaded', () => {
       }
     });
 
+  // UV Exposure
   fetch(`/api/user/${userId}/uv-exposure`)
     .then(res => res.json())
     .then(data => {
@@ -256,12 +245,96 @@ window.addEventListener('DOMContentLoaded', () => {
               fetch(`/api/session/${sessionId}/details`)
                 .then(res => res.json())
                 .then(data => {
+                  // Parse the hourly data
+                  const uvObj = JSON.parse(data.uv_index_per_hour);
+                  const tempObj = JSON.parse(data.temp_per_hour);
+
+                  // Prepare labels and datasets
+                  const labels = [];
+                  const uvData = [];
+                  const tempData = [];
+                  for (let h = 0; h < 24; h++) {
+                    labels.push(`${h}:00`);
+                    uvData.push(uvObj[h] !== undefined ? uvObj[h] : null);
+                    tempData.push(tempObj[h] !== undefined ? tempObj[h] : null);
+                  }
+
+                  // Unique canvas id for this session
+                  const chartId = `chart-session-${data.session_id}`;
+
                   details.innerHTML = `
                     <p><strong>Start:</strong> ${formatTime(data.start_time)}</p>
                     <p><strong>End:</strong> ${formatTime(data.end_time)}</p>
-                    <p><strong>UV Index / Hour:</strong> ${data.uv_index_per_hour}</p>
-                    <p><strong>Temperature / Hour:</strong> ${data.temp_per_hour}</p>
+                    <div style="width:100%;max-width:900px;margin:auto;">
+                      <canvas id="${chartId}" class="session-chart-canvas"></canvas>
+                    </div>
                   `;
+
+                  // Draw the chart after inserting the canvas
+                  const ctx = document.getElementById(chartId);
+                  if (ctx) {
+                    new Chart(ctx, {
+                      type: 'line',
+                      data: {
+                        labels: labels,
+                        datasets: [
+                          {
+                            label: 'UV Index',
+                            data: uvData,
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            tension: 0.2
+                          },
+                          {
+                            label: 'Temperature (°C)',
+                            data: tempData,
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            tension: 0.2,
+                            yAxisID: 'y1'
+                          }
+                        ]
+                      },
+                      options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                          mode: 'index',
+                          intersect: false
+                        },
+                        stacked: false,
+                        scales: {
+                          x: {
+                            title: {
+                              display: true,
+                              text: 'Hour of Day'
+                            }
+                          },
+                          y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                              display: true,
+                              text: 'UV Index'
+                            }
+                          },
+                          y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                              display: true,
+                              text: 'Temperature (°C)'
+                            },
+                            grid: {
+                              drawOnChartArea: false
+                            }
+                          }
+                        }
+                      }
+                    });
+                  }
                 });
             }
       

@@ -98,7 +98,6 @@ def add_user():
                 SELECT 1 FROM weatherData WHERE location = %s AND date = %s
             """, (location, date))
             if not cursor.fetchone():
-                # Simulate weather data (adjust this function as needed)
                 weather_key, location, date, uv_index_per_hour, temp_per_hour, weather_condition = data_simulation.simulate_weatherdata(location, date)
                 cursor.execute("""
                     INSERT INTO weatherData (weatherkey, location, date, uv_index_per_hour, temp_per_hour, weather_condition)
@@ -173,6 +172,8 @@ def get_users():
         cursor.execute("SELECT COUNT(*) as total FROM useraccount")
         total = cursor.fetchone()['total']
 
+
+        # God tier sorting query
         query = f"SELECT * FROM useraccount ORDER BY {sort_by} {sort_order.upper()} LIMIT %s OFFSET %s"
         cursor.execute(query, (limit, offset))
         users = cursor.fetchall()
@@ -193,6 +194,7 @@ def get_users():
 def get_user_preferences(user_id):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
+    # Get user preferences
     cursor.execute("""
         SELECT min_time, max_time, weight_time,
                min_temp, max_temp, weight_temp,
@@ -223,6 +225,7 @@ def update_user_preferences(user_id):
 
     preferences_id = row[0]
 
+    # Update preferences
     cursor.execute("""
         UPDATE preferences
         SET min_time = %s,
@@ -258,11 +261,12 @@ def get_user_sessions(user_id):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
+    # Fetch sessions for the user and sort by date
     cursor.execute("""
         SELECT session_id, location, date, is_scheduled
         FROM session
         WHERE user_id = %s
-        ORDER BY date DESC
+        ORDER BY date ASC
     """, (user_id,))
 
     sessions = cursor.fetchall()
@@ -274,6 +278,7 @@ def get_session_details(session_id):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
+    # Get session information and weather data for the same date and location
     cursor.execute("""
         SELECT 
             s.session_id,
@@ -294,6 +299,7 @@ def get_session_details(session_id):
     cursor.close()
 
     if result:
+        print(result)
         return jsonify(result)
     else:
         return jsonify({"error": "Session not found"}), 404
