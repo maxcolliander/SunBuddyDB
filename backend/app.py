@@ -367,6 +367,35 @@ def mark_all_notifications_as_read(user_id):
     cursor.close()
     return jsonify({"status": "all read"})
 
+@app.route('/api/users/average_uv_exposure')
+def average_uv_exposure():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        query = """
+            SELECT 
+              u.user_id,
+              AVG(calculateUvExposure(s.session_id)) AS avg_uv_exposure
+            FROM useraccount u
+            JOIN session s ON s.user_id = u.user_id
+            WHERE s.is_scheduled = FALSE
+            GROUP BY u.user_id
+            ORDER BY avg_uv_exposure DESC;
+        """
+        cursor.execute(query)
+        results = cursor.fetchall()
+
+        for row in results:
+            row['avg_uv_exposure'] = int(row['avg_uv_exposure']) if row['avg_uv_exposure'] is not None else None
+
+        cursor.close()
+        return jsonify(results)
+
+    except Exception as e:
+        print(f"Error calculating average UV exposure: {e}")
+        return jsonify({"error": "Internal server error"}), 500
+
 if __name__ == '__main__':
     try:
         conn = get_connection()

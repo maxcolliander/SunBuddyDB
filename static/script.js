@@ -84,10 +84,34 @@ function renderPagination() {
     pagination.appendChild(btn);
   }
 }
+
+function loadLeaderboard() {
+  fetch('/api/users/average_uv_exposure')
+    .then(res => res.json())
+    .then(data => {
+      const leaderboardTable = document.getElementById('leaderboardTable');
+      leaderboardTable.innerHTML = '';
+
+      const topUsers = data.slice(0, 5); // Only top 5
+
+      topUsers.forEach(user => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${user.user_id}</td>
+          <td>${user.avg_uv_exposure !== null ? user.avg_uv_exposure : 'N/A'}</td>
+        `;
+        leaderboardTable.appendChild(row);
+      });
+    })
+    .catch(error => {
+      console.error('Error loading leaderboard:', error);
+    });
+}
 // Initial load
 window.addEventListener('DOMContentLoaded', () => {
   renderTableHeader();
   fetchAndDisplayUsers();
+  loadLeaderboard();
 });
 
 const modal = document.getElementById('addUserModal');

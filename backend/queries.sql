@@ -93,8 +93,6 @@ BEGIN
 END;
 
 -- calculateUvExposure
-DROP FUNCTION calculateUvExposure;
-
 CREATE FUNCTION calculateUvExposure(sessionID INT)
 RETURNS FLOAT
 DETERMINISTIC
@@ -142,9 +140,9 @@ END;
 -- avgUvExposurePerUser
 SELECT 
   u.user_id,
-  AVG(calculateUvExposureForSession(s.session_id)) AS avg_uv_exposure
-FROM session s
-JOIN useraccount u ON s.session_id = u.session_id
+  AVG(calculateUvExposure(s.session_id)) AS avg_uv_exposure
+FROM user u
+JOIN session s ON s.user_id = u.user_id
 WHERE s.is_scheduled = FALSE
 GROUP BY u.user_id
-ORDER BY u.user_id;
+ORDER BY avg_uv_exposure DESC;

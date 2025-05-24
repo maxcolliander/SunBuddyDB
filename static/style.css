@@ -425,3 +425,9 @@ button:hover {
   margin-top: -1rem;
   padding: 0.5rem 1rem;
 }
+
+#leaderboard {
+  margin-top: 40px;
+  border-top: 1px solid #ccc;
+  padding-top: 20px;
+}
