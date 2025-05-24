@@ -197,7 +197,6 @@ randomizeUserButton.addEventListener('click', () => {
     .then(data => {
       if (data.skin_type && data.created_at) {
         document.getElementById('skinType').value = data.skin_type;
-        // Use only the date part if needed
         document.getElementById('createdAt').value = data.created_at.split(' ')[0];
       } else {
         alert('Incomplete data received from the server.');
