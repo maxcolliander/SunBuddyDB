@@ -150,60 +150,30 @@ window.addEventListener('click', (event) => {
   }
 });
 
-addUserForm.addEventListener('submit', (event) => {
+function handleAddUser(event) {
   event.preventDefault();
 
-  const userId = document.getElementById('userId').value;
+  const userIdInput = document.getElementById('userId');
   const skinType = document.getElementById('skinType').value;
   const createdAt = document.getElementById('createdAt').value;
+  const userId = userIdInput ? userIdInput.value : null;
 
-  if (userId && skinType && createdAt) {
+  if (skinType && createdAt && (userIdInput ? userId : true)) {
+    const payload = { skin_type: skinType, created_at: createdAt };
+    if (userIdInput) payload.user_id = userId;
+
     fetch('/add-user', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        user_id: userId,
-        skin_type: skinType,
-        created_at: createdAt,
-      }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
-          const table = document.getElementById('userTable');
-
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${userId}</td>
-            <td>${createdAt}</td>
-          `;
-
-          const detailRow = document.createElement('tr');
-          detailRow.style.display = 'none';
-          detailRow.classList.add('detail-row');
-          detailRow.innerHTML = `
-            <td colspan="3">
-              <div class="user-details">
-                <p><strong>Skin Type:</strong> ${skinType}</p>
-                <p><strong>Session:</strong> Not available</p>
-                <p><strong>Progress:</strong> Not available</p>
-                <p><strong>Preferences:</strong> Not available</p>
-              </div>
-            </td>
-          `;
-
-          row.addEventListener('click', () => {
-            detailRow.style.display = detailRow.style.display === 'none' ? 'table-row' : 'none';
-          });
-
-          table.appendChild(row);
-          table.appendChild(detailRow);
-
+          fetchAndDisplayUsers(currentPage);
+          loadLeaderboard();
           modal.style.display = 'none';
           addUserForm.reset();
-          loadLeaderboard();
         } else {
           alert(`Failed to add user: ${data.error}`);
         }
@@ -215,7 +185,9 @@ addUserForm.addEventListener('submit', (event) => {
   } else {
     alert('All fields are required to add a user.');
   }
-});
+}
+
+addUserForm.addEventListener('submit', handleAddUser);
 
 const randomizeUserButton = document.getElementById('randomizeUserButton');
 
@@ -223,11 +195,10 @@ randomizeUserButton.addEventListener('click', () => {
   fetch('/randomize-user', { method: 'POST' })
     .then(response => response.json())
     .then(data => {
-      console.log('Randomized User Data:', data);
-     if (data.skin_type && data.created_at) {
-        
+      if (data.skin_type && data.created_at) {
         document.getElementById('skinType').value = data.skin_type;
-        document.getElementById('createdAt').value = data.created_at.split(' ');
+        // Use only the date part if needed
+        document.getElementById('createdAt').value = data.created_at.split(' ')[0];
       } else {
         alert('Incomplete data received from the server.');
       }
@@ -236,43 +207,5 @@ randomizeUserButton.addEventListener('click', () => {
       console.error('Error randomizing user data:', error);
       alert('Failed to randomize user data.');
     });
-});
-
-addUserForm.addEventListener('submit', (event) => {
-  event.preventDefault();
-
-  const skinType = document.getElementById('skinType').value;
-  const createdAt = document.getElementById('createdAt').value;
-
-  if (skinType && createdAt) {
-    fetch('/add-user', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        skin_type: skinType,
-        created_at: createdAt,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          fetchAndDisplayUsers(currentPage);
-
-          modal.style.display = 'none';
-          addUserForm.reset();
-          loadLeaderboard();
-        } else {
-          alert(`Failed to add user: ${data.error}`);
-        }
-      })
-      .catch((error) => {
-        console.error('Error adding user:', error);
-        alert('Failed to add user.');
-      });
-  } else {
-    alert('All fields are required to add a user.');
-  }
 });
 
