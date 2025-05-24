@@ -1,20 +1,85 @@
 window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('userIdDisplay').textContent = userId;
 
-  // User info
-  fetch(`/api/user/${userId}`)
+  // Load user info and tan level chart
+fetch(`/api/user/${userId}`)
+.then(res => res.json())
+.then(user => {
+  const userDataDiv = document.getElementById('userData');
+
+  // Clear container
+  userDataDiv.innerHTML = '';
+
+  if (user.error) {
+    userDataDiv.innerHTML = `<em>${user.error}</em>`;
+    return;
+  }
+
+  // Display skin type
+  const skinTypeP = document.createElement('p');
+  skinTypeP.innerHTML = `<strong>Skin Type:</strong> ${user.skin_type}`;
+  userDataDiv.appendChild(skinTypeP);
+
+  // Create and add canvas container
+  const chartContainer = document.createElement('div');
+  chartContainer.style.maxWidth = '600px';
+  chartContainer.style.marginTop = '20px';
+  const canvas = document.createElement('canvas');
+  canvas.id = 'tanChart';
+  chartContainer.appendChild(canvas);
+  userDataDiv.appendChild(chartContainer);
+
+  // Fetch and display progress chart
+  fetch(`/api/user/${userId}/progress`)
     .then(res => res.json())
-    .then(user => {
-      const userDataDiv = document.getElementById('userData');
-      if (user.error) {
-        userDataDiv.innerHTML = `<em>${user.error}</em>`;
-        return;
-      }
-      userDataDiv.innerHTML = `
-        <p><strong>Skin Type:</strong> ${user.skin_type}</p>
-        <p><strong>Created At:</strong> ${user.created_at}</p>
-      `;
+    .then(progressData => {
+      if (!progressData || !progressData.length) return;
+
+      const labels = progressData.map(p => new Date(p.date).toLocaleDateString());
+      const tanLevels = progressData.map(p => p.tan_level);
+
+      const ctx = canvas.getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Tan Level',
+            data: tanLevels,
+            borderColor: 'rgba(54, 162, 235, 1)',
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            tension: 0.2,
+            pointRadius: 3,
+            pointHoverRadius: 5,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          scales: {
+            x: {
+              title: { display: true, text: 'Date' }
+            },
+            y: {
+              beginAtZero: true,
+              suggestedMax: 10,
+              title: { display: true, text: 'Tan Level' }
+            }
+          }
+        }
+      });
     });
+})
+.catch(err => {
+  console.error('Error loading user info:', err);
+  document.getElementById('userData').innerHTML = '<em>Error loading user data.</em>';
+});
+    
 
   // Notifications
   fetch(`/api/user/${userId}/notifications`)

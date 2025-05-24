@@ -395,6 +395,47 @@ def average_uv_exposure():
     except Exception as e:
         print(f"Error calculating average UV exposure: {e}")
         return jsonify({"error": "Internal server error"}), 500
+    
+@app.route('/api/user/<int:user_id>')
+def get_user_info(user_id):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT user_id, skin_type, created_at
+            FROM useraccount
+            WHERE user_id = %s
+        """, (user_id,))
+
+        user = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if user:
+            return jsonify(user)
+        else:
+            return jsonify({"error": "User not found"}), 404
+
+    except Exception as e:
+        print(f"Error fetching user info for user {user_id}: {e}")
+        return jsonify({"error": "Internal server error"}), 500
+    
+@app.route('/api/user/<int:user_id>/progress')
+def get_user_progress(user_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT date, tan_level
+        FROM progressData
+        WHERE user_id = %s
+        ORDER BY date
+    """, (user_id,))
+    
+    results = cursor.fetchall()
+    cursor.close()
+    return jsonify(results)
 
 if __name__ == '__main__':
     try:
