@@ -275,34 +275,46 @@ def get_user_sessions(user_id):
 
 @app.route('/api/session/<int:session_id>/details')
 def get_session_details(session_id):
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
 
-    # Get session information and weather data for the same date and location
-    cursor.execute("""
-        SELECT 
-            s.session_id,
-            s.date,
-            s.start_time,
-            s.end_time,
-            s.location,
-            w.uv_index_per_hour,
-            w.temp_per_hour
-        FROM session s
-        JOIN weatherData w 
-          ON s.location = w.location 
-          AND s.date = w.date
-        WHERE s.session_id = %s
-    """, (session_id,))
+        # Call stored procedure instead of raw SQL
+        cursor.callproc('getSessionData', [session_id])
+
+        # Fetch the result from stored procedure
+        result = None
+        for res in cursor.stored_results():
+            result = res.fetchone()
+
+        cursor.close()
+
+        if result:
+            return jsonify(result)
+        else:
+            return jsonify({"error": "Session not found"}), 404
+
+    except Exception as e:
+        print(f"Error retrieving session details: {e}")
+        return jsonify({"error": "Internal server error"}), 500
     
-    result = cursor.fetchone()
-    cursor.close()
+@app.route('/api/session/<int:session_id>/uv_exposure')
+def get_uv_exposure(session_id):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
 
-    if result:
-        print(result)
-        return jsonify(result)
-    else:
-        return jsonify({"error": "Session not found"}), 404
+        cursor.execute("SELECT calculateUvExposure(%s)", (session_id,))
+        result = cursor.fetchone()
+        uv_exposure = int(result[0]) if result and result[0] is not None else None
+
+        cursor.close()
+        return jsonify({"session_id": session_id, "uv_exposure": uv_exposure})
+
+    except Exception as e:
+        print(f"Error calculating UV exposure: {e}")
+        return jsonify({"error": "Internal server error"}), 500
+
 
 # All routes for notifications
 @app.route('/api/user/<int:user_id>/notifications')
@@ -350,11 +362,7 @@ def delete_notification(notification_id):
 def mark_all_notifications_as_read(user_id):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("""
-        UPDATE notifications
-        SET is_read = TRUE
-        WHERE user_id = %s AND is_read = FALSE
-    """, (user_id,))
+    cursor.callproc('markNotificationsAsRead', [user_id])
     conn.commit()
     cursor.close()
     return jsonify({"status": "all read"})

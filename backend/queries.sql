@@ -64,92 +64,76 @@ DROP TABLE IF EXISTS weatherData;
 DROP TABLE IF EXISTS useraccount;
 DROP TABLE IF EXISTS session;
 
-
--- loadUserPreviousSessions
-SELECT 
-  s.session_id,
-  s.date,
-  s.start_time,
-  s.end_time,
-  s.location,
-  w.uv_index_per_hour,
-  w.temp_per_hour
-FROM session s
-JOIN weatherData w 
-  ON s.location = w.location 
-  AND s.date = w.date
-JOIN useraccount u 
-  ON s.session_id = u.session_id
-WHERE s.is_scheduled = FALSE
-  AND u.user_id = ?
-ORDER BY s.date;
-
--- loadUserScheduledSessions
-SELECT 
-  s.session_id,
-  s.date,
-  s.start_time,
-  s.end_time,
-  s.location,
-  w.uv_index_per_hour,
-  w.temp_per_hour
-FROM session s
-JOIN weatherData w 
-  ON s.location = w.location 
-  AND s.date = w.date
-JOIN useraccount u 
-  ON s.session_id = u.session_id
-WHERE s.is_scheduled = TRUE
-  AND u.user_id = ?
-  AND s.date >= CURRENT_DATE
-ORDER BY s.date
-LIMIT 5;
+-- getSessionData
+CREATE PROCEDURE getSessionData(IN sessionID INT)
+BEGIN
+    SELECT 
+        s.session_id,
+        s.date,
+        s.start_time,
+        s.end_time,
+        s.location,
+        w.uv_index_per_hour,
+        w.temp_per_hour
+    FROM session s
+    JOIN weatherData w 
+      ON s.location = w.location 
+      AND s.date = w.date
+    WHERE s.session_id = sessionID;
+END;
 
 -- markNotificationsAsRead
 CREATE PROCEDURE markNotificationsAsRead (
-  IN uid INT
+  IN userid INT
 )
 BEGIN
   UPDATE notifications
   SET is_read = TRUE
-  WHERE user_id = uid AND is_read = FALSE;
+  WHERE user_id = userid AND is_read = FALSE;
 END;
 
--- calculateUvExposureForSession
-CREATE FUNCTION calculateUvExposureForSession (
-  IN sessID INT
-)
+-- calculateUvExposure
+DROP FUNCTION calculateUvExposure;
+
+CREATE FUNCTION calculateUvExposure(sessionID INT)
 RETURNS FLOAT
+DETERMINISTIC
 BEGIN
-  DECLARE s_start TIMESTAMP;
-  DECLARE s_end TIMESTAMP;
+  DECLARE s_start DATETIME;
+  DECLARE s_end DATETIME;
   DECLARE s_date DATE;
   DECLARE s_location VARCHAR(100);
   DECLARE uv_json JSON;
-  DECLARE hour TEXT;
+  DECLARE hour_key VARCHAR(5);
   DECLARE uv_value FLOAT DEFAULT 0;
   DECLARE total FLOAT DEFAULT 0;
-  DECLARE current_hour TIMESTAMP;
+  DECLARE current_hour DATETIME;
 
   SELECT start_time, end_time, date, location
   INTO s_start, s_end, s_date, s_location
   FROM session
-  WHERE session_id = sessID;
+  WHERE session_id = sessionID;
 
   SELECT uv_index_per_hour
   INTO uv_json
   FROM weatherData
   WHERE location = s_location AND date = s_date;
 
-  SET current_hour := DATE_TRUNC('hour', s_start);
+  SET current_hour = TIMESTAMP(DATE(s_start), MAKETIME(HOUR(s_start), 0, 0));
 
   WHILE current_hour <= s_end DO
-    SET hour := TO_CHAR(current_hour, 'HH24:MI');
-    SET uv_value := (uv_json ->> hour)::FLOAT;
+    SET hour_key = CAST(HOUR(current_hour) AS CHAR);
+
+    SET uv_value = CAST(
+      JSON_UNQUOTE(JSON_EXTRACT(uv_json, CONCAT('$."', hour_key, '"')))
+      AS DECIMAL(10,2)
+    );
+
     IF uv_value IS NOT NULL THEN
-      SET total := total + (uv_value * 60);  -- Assume 60 min per hour
+      SET total = total + (uv_value * 60); 
     END IF;
-    SET current_hour := current_hour + INTERVAL '1 hour';
+
+    SET current_hour = DATE_ADD(current_hour, INTERVAL 1 HOUR);
   END WHILE;
 
   RETURN total;
@@ -164,5 +148,3 @@ JOIN useraccount u ON s.session_id = u.session_id
 WHERE s.is_scheduled = FALSE
 GROUP BY u.user_id
 ORDER BY u.user_id;
-
-SELECT * FROM notifications WHERE user_id = 1;
