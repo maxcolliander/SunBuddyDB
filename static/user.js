@@ -322,6 +322,7 @@ fetch(`/api/user/${userId}`)
                         <p><strong>Start:</strong> ${formatTime(data.start_time)}</p>
                         <p><strong>End:</strong> ${formatTime(data.end_time)}</p>
                         <p><strong>UV Exposure:</strong> ${uv.uv_exposure}</p>
+                        <p><strong>Weather Condition:</strong> ${data.weather_condition}</p>
                         <div style="width:100%;max-width:900px;margin:auto;">
                           <canvas id="${chartId}" class="session-chart-canvas"></canvas>
                         </div>

@@ -61,6 +61,7 @@ DROP TABLE IF EXISTS weatherData;
 DROP TABLE IF EXISTS useraccount;
 DROP TABLE IF EXISTS session;
 
+DROP PROCEDURE IF EXISTS getSessionData;
 -- getSessionData
 CREATE PROCEDURE getSessionData(IN sessionID INT)
 BEGIN
@@ -71,7 +72,8 @@ BEGIN
         s.end_time,
         s.location,
         w.uv_index_per_hour,
-        w.temp_per_hour
+        w.temp_per_hour,
+        w.weather_condition
     FROM session s
     JOIN weatherData w 
       ON s.location = w.location 
