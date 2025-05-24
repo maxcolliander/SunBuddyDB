@@ -85,7 +85,6 @@ def add_user():
             INSERT INTO preferences (user_id, min_time, max_time, weight_time, min_temp, max_temp, weight_temp, min_uv, max_uv, weight_uv)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (user_id, *preferences[1:]))
-        preferences_id = cursor.lastrowid
         print("Preferences: ", preferences)
 
         # Insert into session
