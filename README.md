@@ -52,15 +52,17 @@ SunBuddyDB/
 ├── backend/
 │   ├── app.py
 │   ├── queries.sql
-│   └── ...
+│   ├── data_simulation.py
+│   └── .env
+│
 ├── static/
 │   ├── user.js
 │   ├── script.js
-│   ├── style.css
-│   └── ...
+│   └── style.css
+│   
 ├── templates/
 │   ├── user.html
-│   └── ...
+│   └── index.html
 └── README.md
 ```
 
