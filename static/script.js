@@ -1,3 +1,4 @@
+// DEFAULT VALUES
 const USERS_PER_PAGE = 20;
 let currentPage = 1;
 let totalUsers = 0;
@@ -92,7 +93,7 @@ function loadLeaderboard() {
       const leaderboardTable = document.getElementById('leaderboardTable');
       leaderboardTable.innerHTML = '';
 
-      const topUsers = data.slice(0, 5); // Only top 5
+      const topUsers = data.slice(0, 5);
 
       topUsers.forEach(user => {
         const row = document.createElement('tr');
@@ -107,7 +108,7 @@ function loadLeaderboard() {
       console.error('Error loading leaderboard:', error);
     });
 }
-// Initial load
+
 window.addEventListener('DOMContentLoaded', () => {
   renderTableHeader();
   fetchAndDisplayUsers();
@@ -173,14 +174,12 @@ addUserForm.addEventListener('submit', (event) => {
         if (data.success) {
           const table = document.getElementById('userTable');
 
-          // Create the main row
           const row = document.createElement('tr');
           row.innerHTML = `
             <td>${userId}</td>
             <td>${createdAt}</td>
           `;
 
-          // Create the expandable detail row
           const detailRow = document.createElement('tr');
           detailRow.style.display = 'none';
           detailRow.classList.add('detail-row');
@@ -195,12 +194,10 @@ addUserForm.addEventListener('submit', (event) => {
             </td>
           `;
 
-          // Toggle expansion on click
           row.addEventListener('click', () => {
             detailRow.style.display = detailRow.style.display === 'none' ? 'table-row' : 'none';
           });
 
-          // Add both rows to the table
           table.appendChild(row);
           table.appendChild(detailRow);
 
@@ -260,7 +257,6 @@ addUserForm.addEventListener('submit', (event) => {
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
-          // Add the new user to the table dynamically
           fetchAndDisplayUsers(currentPage);
 
           modal.style.display = 'none';

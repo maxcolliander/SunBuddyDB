@@ -1,13 +1,11 @@
 window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('userIdDisplay').textContent = userId;
 
-  // Load user info and tan level chart
 fetch(`/api/user/${userId}`)
 .then(res => res.json())
 .then(user => {
   const userDataDiv = document.getElementById('userData');
 
-  // Clear container
   userDataDiv.innerHTML = '';
 
   if (user.error) {
@@ -15,21 +13,19 @@ fetch(`/api/user/${userId}`)
     return;
   }
 
-  // Display skin type
   const skinTypeP = document.createElement('p');
   skinTypeP.innerHTML = `<strong>Skin Type:</strong> ${user.skin_type}`;
   userDataDiv.appendChild(skinTypeP);
 
-  // Create and add canvas container
   const chartContainer = document.createElement('div');
-  chartContainer.style.maxWidth = '600px';
+  chartContainer.style.maxWidth = '900px';
   chartContainer.style.marginTop = '20px';
   const canvas = document.createElement('canvas');
+  canvas.style.width = '100%';
   canvas.id = 'tanChart';
   chartContainer.appendChild(canvas);
   userDataDiv.appendChild(chartContainer);
 
-  // Fetch and display progress chart
   fetch(`/api/user/${userId}/progress`)
     .then(res => res.json())
     .then(progressData => {
@@ -172,14 +168,13 @@ fetch(`/api/user/${userId}`)
           max_uv: parseInt(data.max_uv),
           weight_uv: parseInt(data.weight_uv)
         };
-        // Watch for changes
+
         document.querySelectorAll('#userPreferences input').forEach(input => {
           input.addEventListener('input', () => {
             showSnackbar();
           });
         });
 
-        // Show snackbar
         function showSnackbar() {
           const bar = document.getElementById('preferenceSnackbar');
           bar.classList.remove('hidden');
@@ -208,7 +203,6 @@ fetch(`/api/user/${userId}`)
             .then(response => {
               if (response.ok) {
                 document.getElementById('preferenceSnackbar').classList.add('hidden');
-                // Update stored original values
                 originalValues = { ...updatedPreferences };
               } else {
                 alert('Failed to save preferences.');
@@ -220,9 +214,7 @@ fetch(`/api/user/${userId}`)
             });
         });
 
-        // Discard button handler
         document.getElementById('discardPrefs').addEventListener('click', () => {
-          // Reset all inputs to original values
           for (const key in originalValues) {
             const el = document.getElementById(key);
             if (el) el.value = originalValues[key];
@@ -238,7 +230,7 @@ fetch(`/api/user/${userId}`)
       console.error("Preferences fetch error:", error);
     });
 
-    // For buttons in the sessions section to toggle previous/scheduled sessions
+
     document.getElementById('recordedBtn').addEventListener('click', () => {
       document.getElementById('recordedSessions').classList.remove('hidden');
       document.getElementById('upcomingSessions').classList.add('hidden');
@@ -289,7 +281,6 @@ fetch(`/api/user/${userId}`)
 
         div.innerHTML = summaryHTML;
 
-        // Append to correct container
         if (session.is_scheduled) {
           upcomingContainer.appendChild(div);
         } else {
@@ -297,14 +288,12 @@ fetch(`/api/user/${userId}`)
         }
       });
 
-
       document.querySelectorAll('.toggle-details').forEach(btn => {
         btn.addEventListener('click', () => {
           const card = btn.closest('.session-card');
           const details = card.querySelector('.session-details');
           const sessionId = card.querySelector('.session-summary').dataset.sessionId;
       
-          // If currently hidden, show and fetch if needed
           if (details.classList.contains('hidden')) {
             if (details.innerHTML.trim() === '') {
               fetch(`/api/session/${sessionId}/details`)
@@ -324,7 +313,6 @@ fetch(`/api/user/${userId}`)
                 
                   const chartId = `chart-session-${data.session_id}`;
                 
-                  // Now fetch UV exposure *before* setting the innerHTML
                   fetch(`/api/session/${sessionId}/uv_exposure`)
                     .then(res => res.json())
                     .then(uv => {
@@ -408,7 +396,7 @@ fetch(`/api/user/${userId}`)
             details.classList.remove('hidden');
             btn.textContent = 'Hide';
           } else {
-            // Already expanded → hide it
+            // If expanded hide it
             details.classList.add('hidden');
             btn.textContent = 'Details';
           }
@@ -452,7 +440,7 @@ function loadNotifications() {
       document.querySelectorAll('.notification-action').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = btn.dataset.id;
-          const isReadNow = btn.dataset.read === 'true'; // evaluate on click
+          const isReadNow = btn.dataset.read === 'true';
       
           const action = isReadNow
             ? fetch(`/api/notification/${id}`, { method: 'DELETE' })

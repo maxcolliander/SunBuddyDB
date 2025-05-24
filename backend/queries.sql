@@ -141,7 +141,7 @@ END;
 SELECT 
   u.user_id,
   AVG(calculateUvExposure(s.session_id)) AS avg_uv_exposure
-FROM user u
+FROM useraccount u
 JOIN session s ON s.user_id = u.user_id
 WHERE s.is_scheduled = FALSE
 GROUP BY u.user_id
