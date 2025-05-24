@@ -49,21 +49,27 @@ DB_NAME=sunbuddydb
 ```
 SunBuddyDB/
 │
+├── .gitignore
+├── LICENSE
+├── README.md
+├── requirements.txt
+├── .vscode/
+│   └── settings.json
+│
 ├── backend/
+│   ├── .env
 │   ├── app.py
-│   ├── queries.sql
 │   ├── data_simulation.py
-│   └── .env
+│   └── queries.sql
 │
 ├── static/
-│   ├── user.js
 │   ├── script.js
-│   └── style.css
-│   
+│   ├── style.css
+│   └── user.js
+│
 ├── templates/
-│   ├── user.html
-│   └── index.html
-└── README.md
+│   ├── index.html
+│   └── user.html
 ```
 
 ---
