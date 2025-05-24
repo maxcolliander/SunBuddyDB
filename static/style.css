@@ -338,10 +338,6 @@ button:hover {
   border-color: #007bff;
 }
 
-.hidden {
-  display: none;
-}
-
 .sessions-header {
   display: flex;
   justify-content: space-between;

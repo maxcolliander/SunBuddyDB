@@ -94,7 +94,7 @@ def simulate_weatherdata(location, date):
 
     weather_condition = random.choice(["Sunny", "Partly cloudy", "Cloudy", "Rainy", "Windy"])
 
-        # Temp
+    # Temp
     temperatures = {}
     base_temp = random.uniform(10, 20)
     amplitude = random.uniform(5, 10)
@@ -125,71 +125,3 @@ def simulate_weatherdata(location, date):
         json.dumps(temperatures),
         weather_condition
     ]
-
-
-if __name__ == "__main__":
-    all_users = []
-    for i in range(1, 101):
-        user_id = i
-        progress_id = i
-        preferences_id = i
-        session_id = i
-        notifications_id = i
-
-        user = simulate_useraccount(user_id, progress_id, session_id, preferences_id)
-        preferences = simulate_preferences(preferences_id)
-        session = simulate_session(session_id, session_id, progress_id)
-        progress = simulate_progressdata(progress_id)
-        notification = simulate_notifications(notifications_id, user_id)
-        
-        all_users.append({
-            "user_id": user[0],
-            "skin_type": user[1],
-            "created_at": user[2],
-            "session": {
-                "location": session[3],
-                "start_time": session[4],
-                "end_time": session[5]
-            },
-            "progress": {
-                "tan_level": progress[1],
-                "date": progress[2]
-            },
-            "preferences": {
-                "min_time": preferences[1],
-                "max_time": preferences[2],
-                "weight_time": preferences[3],
-                "min_temp": preferences[4],
-                "max_temp": preferences[5],
-                "weight_temp": preferences[6],
-                "min_uv": preferences[7],
-                "max_uv": preferences[8],
-                "weight_uv": preferences[9]
-            },
-            "notifications": {
-                "message": notification[2],
-                "created_at": notification[3],
-                "is_read": notification[4]
-            }
-        })
-    with open("users.json", "w") as f:
-        json.dump(all_users, f, indent=2)
-
-    json_data = []
-    for i in range(100):
-        weather_data = simulate_weatherdata(i)
-
-        data_to_write = {
-            "weather_key": weather_data[0],
-            "location": weather_data[1],
-            "date": weather_data[2],
-            "temperature_per_hour": weather_data[3],
-            "uv_index_per_hour": weather_data[4],
-            "weather_condition": weather_data[5]
-        }
-        
-        json_data.append(data_to_write)
-    
-    with open("weather_data.json", "w") as f:
-        json.dump(json_data, f, indent=2)
-    f.close()

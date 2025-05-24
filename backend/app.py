@@ -61,15 +61,16 @@ def add_user():
         user_id = cursor.fetchone()[0]
 
         cursor.execute("""
-            INSERT INTO useraccount (skin_type, created_at, progress_id, preferences_id, session_id)
-            VALUES (%s, %s, NULL, NULL, NULL)
+            INSERT INTO useraccount (skin_type, created_at)
+            VALUES (%s, %s)
         """, (skin_type, created_at))
         user_id = cursor.lastrowid
 
         # Insert into progressData (let DB assign ID)
         for i in range(5):
             progress = data_simulation.simulate_progressdata(user_id)
-            cursor.execute("""
+            cursor.execute(
+            """
                 INSERT INTO progressData (user_id, tan_level, date)
                 VALUES (%s, %s, %s)
             """, (user_id, progress[1], progress[2]))
@@ -79,7 +80,8 @@ def add_user():
 
         # Insert into preferences¨
         preferences = data_simulation.simulate_preferences(user_id)
-        cursor.execute("""
+        cursor.execute(
+        """
             INSERT INTO preferences (user_id, min_time, max_time, weight_time, min_temp, max_temp, weight_temp, min_uv, max_uv, weight_uv)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (user_id, *preferences[1:]))
@@ -94,17 +96,20 @@ def add_user():
             date = session[4]
 
             # Ensure weatherData exists for this location and date
-            cursor.execute("""
+            cursor.execute(
+            """
                 SELECT 1 FROM weatherData WHERE location = %s AND date = %s
             """, (location, date))
             if not cursor.fetchone():
                 weather_key, location, date, uv_index_per_hour, temp_per_hour, weather_condition = data_simulation.simulate_weatherdata(location, date)
-                cursor.execute("""
+                cursor.execute(
+                """
                     INSERT INTO weatherData (weatherkey, location, date, uv_index_per_hour, temp_per_hour, weather_condition)
                     VALUES (%s, %s, %s, %s, %s, %s)
                 """, (weather_key, location, date, uv_index_per_hour, temp_per_hour, weather_condition))
 
-            cursor.execute("""
+            cursor.execute(
+            """
                 INSERT INTO session (user_id, location, date, start_time, end_time, is_scheduled)
                 VALUES (%s, %s, %s, %s, %s, %s)
             """, (user_id, location, date, session[5], session[6], session[7]))
@@ -113,17 +118,12 @@ def add_user():
 
         for i in range(10):
             notification = data_simulation.simulate_notifications(None, user_id)
-            cursor.execute("""
+            cursor.execute(
+            """
                 INSERT INTO notifications (user_id, message, created_at, is_read)
                 VALUES (%s, %s, %s, %s)
             """, notification[1:])
             print("Notification: ", notification)
-        
-        cursor.execute("""
-            UPDATE useraccount
-            SET progress_id = %s, preferences_id = %s, session_id = %s
-            WHERE user_id = %s
-        """, (progress_id, preferences_id, session_ids[0], user_id))
 
         conn.commit()
         cursor.close()
@@ -195,7 +195,8 @@ def get_user_preferences(user_id):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     # Get user preferences
-    cursor.execute("""
+    cursor.execute(
+    """
         SELECT min_time, max_time, weight_time,
                min_temp, max_temp, weight_temp,
                min_uv, max_uv, weight_uv
@@ -226,7 +227,8 @@ def update_user_preferences(user_id):
     preferences_id = row[0]
 
     # Update preferences
-    cursor.execute("""
+    cursor.execute(
+    """
         UPDATE preferences
         SET min_time = %s,
             max_time = %s,
@@ -262,7 +264,8 @@ def get_user_sessions(user_id):
     cursor = conn.cursor(dictionary=True)
 
     # Fetch sessions for the user and sort by date
-    cursor.execute("""
+    cursor.execute(
+    """
         SELECT session_id, location, date, is_scheduled
         FROM session
         WHERE user_id = %s
@@ -402,7 +405,8 @@ def get_user_info(user_id):
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
 
-        cursor.execute("""
+        cursor.execute(
+        """
             SELECT user_id, skin_type, created_at
             FROM useraccount
             WHERE user_id = %s

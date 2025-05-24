@@ -203,6 +203,7 @@ addUserForm.addEventListener('submit', (event) => {
 
           modal.style.display = 'none';
           addUserForm.reset();
+          loadLeaderboard();
         } else {
           alert(`Failed to add user: ${data.error}`);
         }
@@ -261,6 +262,7 @@ addUserForm.addEventListener('submit', (event) => {
 
           modal.style.display = 'none';
           addUserForm.reset();
+          loadLeaderboard();
         } else {
           alert(`Failed to add user: ${data.error}`);
         }

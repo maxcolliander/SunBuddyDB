@@ -105,6 +105,7 @@ fetch(`/api/user/${userId}`)
       }
     });
 
+  // Preferences
   fetch(`/api/user/${userId}/preferences`)
     .then(response => response.json())
     .then(data => {
@@ -119,7 +120,7 @@ fetch(`/api/user/${userId}`)
             <input type="number" value="${data.max_time}" id="max_time" min="30" max="480">
           </label><br>
 
-          <label><strong>How imporant is the length of the session? (1-3)</strong>
+          <label><strong>How important is the length of the session? (1-3)</strong>
             <input type="number" value="${data.weight_time}" id="weight_time" min="1" max="3">
           </label><br>
 
@@ -131,7 +132,7 @@ fetch(`/api/user/${userId}`)
             <input type="number" value="${data.max_temp}" id="max_temp" min="10" max="40">
           </label><br>
 
-          <label><strong>How imporant are the outside temperatures during the session? (1-3)</strong>
+          <label><strong>How important are the outside temperatures during the session? (1-3)</strong>
             <input type="number" value="${data.weight_temp}" id="weight_temp" min="1" max="3">
           </label><br>
 
@@ -143,7 +144,7 @@ fetch(`/api/user/${userId}`)
             <input type="number" value="${data.max_uv}" id="max_uv" min="2" max="14">
           </label><br>
 
-          <label><strong>How imporant are the UV-levels during the session? (1-3)</strong>
+          <label><strong>How important are the UV-levels during the session? (1-3)</strong>
             <input type="number" value="${data.weight_uv}" id="weight_uv" min="1" max="3">
           </label><br>
         `;
@@ -253,6 +254,7 @@ fetch(`/api/user/${userId}`)
         btn.textContent = details.classList.contains('hidden') ? 'Details' : 'Hide';
       });
     });
+    // Load sessions
     fetch(`/api/user/${userId}/sessions`)
     .then(res => res.json())
     .then(sessions => {

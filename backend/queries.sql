@@ -1,10 +1,7 @@
 CREATE TABLE useraccount (
   user_id INT AUTO_INCREMENT PRIMARY KEY,
   skin_type INT,
-  created_at DATE,
-  progress_id INT,
-  preferences_id INT,
-  session_id INT
+  created_at DATE
 );
 
 CREATE TABLE preferences (
