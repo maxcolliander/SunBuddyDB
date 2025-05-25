@@ -78,7 +78,7 @@ def add_user():
             print("Progress: ", progress)
         
 
-        # Insert into preferences¨
+        # Insert into preferences
         preferences = data_simulation.simulate_preferences(user_id)
         cursor.execute(
         """
@@ -318,13 +318,13 @@ def get_uv_exposure(session_id):
         return jsonify({"error": "Internal server error"}), 500
 
 
-# All routes for notifications
 @app.route('/api/user/<int:user_id>/notifications')
 def get_user_notifications(user_id):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
-    cursor.execute("""
+    cursor.execute(
+    """
         SELECT notifications_id, message, created_at, is_read
         FROM notifications
         WHERE user_id = %s
@@ -339,7 +339,8 @@ def get_user_notifications(user_id):
 def mark_notification_as_read(notification_id):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(
+    """
         UPDATE notifications
         SET is_read = TRUE
         WHERE notifications_id = %s
@@ -352,7 +353,8 @@ def mark_notification_as_read(notification_id):
 def delete_notification(notification_id):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(
+    """
         DELETE FROM notifications
         WHERE notifications_id = %s
     """, (notification_id,))
@@ -429,7 +431,8 @@ def get_user_progress(user_id):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
-    cursor.execute("""
+    cursor.execute(
+    """
         SELECT date, tan_level
         FROM progressData
         WHERE user_id = %s
